@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import PlusOneTV from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import AdminLayout from "@/components/admin-view/admin-layout";
+import AdminDashboard from "@/pages/admin-view/admin-dashboard";
 
 function App() {
   return (
@@ -11,8 +12,10 @@ function App() {
       <Routes>
         {/* Home Route */}
         <Route path="/" element={<PlusOneTV />} />
+
+        {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminLayout />} />  
+          <Route path="dashboard" element={<AdminDashboard />} />
         </Route>
 
         {/* Fallback Route */}

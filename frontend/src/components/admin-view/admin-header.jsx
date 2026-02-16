@@ -1,37 +1,21 @@
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { logoutUser } from "../../features/auth/authSlice";
 import { Button } from "../ui/button";
 import { AlignJustify, LogOut } from "lucide-react";
 
-
-function AdminHeader({setOpen }) {
+function AdminHeader({ setOpen }) {
   useEffect(() => {
-    // Dynamically hide the header and footer, and adjust the body padding-top
     const header = document.querySelector("header");
     const footer = document.querySelector("footer");
     const body = document.querySelector("body");
 
-    if (header) {
-      // Hide the header for all screens
-      header.style.display = "none"; 
-    }
-
-    if (footer) {
-      // Hide the footer for all screens
-      footer.style.display = "none"; 
-    }
-
-    if (body) {
-      // Remove padding-top from body (pt)
-      body.style.paddingTop = "0px"; 
-    }
+    if (header) header.style.display = "none";
+    if (footer) footer.style.display = "none";
+    if (body) body.style.paddingTop = "0px";
   }, []);
 
-  const dispatch = useDispatch();
-
+  // Temporary logout handler
   function handleLogout() {
-    dispatch(logoutUser());
+    console.log("Logout clicked (not integrated yet)");
   }
 
   return (
@@ -40,6 +24,7 @@ function AdminHeader({setOpen }) {
         <AlignJustify />
         <span className="sr-only">Toggle Menu</span>
       </Button>
+
       <div className="flex flex-1 justify-end">
         <Button
           onClick={handleLogout}
