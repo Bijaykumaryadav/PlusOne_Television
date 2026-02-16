@@ -3,15 +3,15 @@ import { Button } from "../ui/button";
 import { AlignJustify, LogOut } from "lucide-react";
 
 function AdminHeader({ setOpen }) {
-  useEffect(() => {
-    const header = document.querySelector("header");
-    const footer = document.querySelector("footer");
-    const body = document.querySelector("body");
+  // useEffect(() => {
+  //   const header = document.querySelector("header");
+  //   const footer = document.querySelector("footer");
+  //   const body = document.querySelector("body");
 
-    if (header) header.style.display = "none";
-    if (footer) footer.style.display = "none";
-    if (body) body.style.paddingTop = "0px";
-  }, []);
+  //   if (header) header.style.display = "none";
+  //   if (footer) footer.style.display = "none";
+  //   if (body) body.style.paddingTop = "0px";
+  // }, []);
 
   // Temporary logout handler
   function handleLogout() {
