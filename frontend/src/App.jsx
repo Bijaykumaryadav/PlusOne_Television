@@ -8,6 +8,7 @@ import AdminDashboard from "@/pages/admin-view/admin-dashboard";
 import AdminAuthLayout from "./components/admin-auth/layout";
 import AdminLogin from "@/pages/admin-auth/login";
 import AdminRegister from "@/pages/admin-auth/register";
+import AdminArticles from "./pages/admin-view/admin-article";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="articles" element={<AdminArticles/>} />
         </Route>
 
         {/* Fallback Route */}

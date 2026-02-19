@@ -1,14 +1,99 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 // import { useSelector, useDispatch } from "react-redux"; // BACKEND: Redux disabled
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import CommonForm from "@/components/Common/form";
-import ProductImageUpload from "@/components/AdminView/ImageUpload";
+// import ProductImageUpload from "@/components/AdminView/ImageUpload"; // BACKEND: Image upload disabled
 // import { addProductFormElements } from "@/config"; // BACKEND: Original config
 // BACKEND: Redux actions disabled
 // import { addNewProducts, editProducts, fetchAllProducts, deleteProducts } from "@/features/admin/productSlice";
-import { useToast } from "@/hooks/use-toast";
-import AdminProductsTile from "../../components/AdminView/ProductTile";
+// import { useToast } from "@/hooks/use-toast";
+// import AdminProductsTile from "../../components/AdminView/ProductTile"; // STATIC: Defined inline below
+
+// STATIC: Inline AdminProductsTile component (replaces imported AdminProductsTile)
+function AdminProductsTile({ product, setFormData, setOpenCreateProductsDialog, setCurrentEditedId, handleDelete }) {
+  const categoryColors = {
+    breaking: "bg-red-100 text-red-700",
+    politics: "bg-blue-100 text-blue-700",
+    business: "bg-green-100 text-green-700",
+    technology: "bg-purple-100 text-purple-700",
+    sports: "bg-orange-100 text-orange-700",
+    entertainment: "bg-pink-100 text-pink-700",
+    health: "bg-teal-100 text-teal-700",
+    world: "bg-yellow-100 text-yellow-700",
+  };
+
+  return (
+    <Card className="w-full max-w-sm mx-auto overflow-hidden shadow-md">
+      <div className="relative">
+        <img
+          src={product?.image}
+          alt={product?.title}
+          className="w-full h-44 object-cover"
+        />
+        {product?.featured === "yes" && (
+          <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded">
+            Featured
+          </span>
+        )}
+        {product?.category && (
+          <span className={`absolute top-2 right-2 text-xs font-semibold px-2 py-0.5 rounded ${categoryColors[product.category] || "bg-gray-100 text-gray-700"}`}>
+            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+          </span>
+        )}
+      </div>
+      <CardContent className="p-4">
+        <h2 className="text-base font-bold leading-snug line-clamp-2 mb-1">{product?.title}</h2>
+        <p className="text-sm text-gray-500 line-clamp-2 mb-2">{product?.summary}</p>
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <span>By {product?.author}</span>
+          <span>{product?.publishedDate ? new Date(product.publishedDate).toLocaleDateString() : ""}</span>
+        </div>
+        {product?.tags && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {product.tags.split(",").map((tag, i) => (
+              <span key={i} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                {tag.trim()}
+              </span>
+            ))}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between gap-2 p-4 pt-0">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={() => {
+            setCurrentEditedId(product._id);
+            setFormData({
+              image: product.image || null,
+              title: product.title || "",
+              summary: product.summary || "",
+              content: product.content || "",
+              category: product.category || "",
+              author: product.author || "",
+              tags: product.tags || "",
+              featured: product.featured || "no",
+            });
+            setOpenCreateProductsDialog(true);
+          }}
+        >
+          Edit
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="flex-1"
+          onClick={() => handleDelete(product._id)}
+        >
+          Delete
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
 
 // STATIC: Article form configuration for news channel
 const articleFormElements = [
@@ -129,37 +214,38 @@ function AdminArticles() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
-  
+
   // BACKEND: Redux state disabled - using local state instead
   // const { productList, isLoading } = useSelector((state) => state.adminProducts);
   // const dispatch = useDispatch();
   const isLoading = false; // STATIC: No loading state needed
-  
-  const { toast } = useToast();
+
+  // const { toast } = useToast(); // BACKEND: Toast notifications disabled
 
   function onSubmit(event) {
     event.preventDefault();
 
     if (currentEditedId !== null) {
       // STATIC: Edit article locally
-      setArticleList(prevList => 
-        prevList.map(article => 
-          article._id === currentEditedId 
-            ? { 
-                ...article, 
-                ...formData, 
+      setArticleList(prevList =>
+        prevList.map(article =>
+          article._id === currentEditedId
+            ? {
+                ...article,
+                ...formData,
                 image: uploadedImageUrl || article.image,
-                updatedDate: new Date().toISOString()
+                updatedDate: new Date().toISOString(),
               }
             : article
         )
       );
-      
-      toast({
-        title: "Article updated successfully",
-        description: "Your article changes have been saved.",
-      });
-      
+
+      // BACKEND: Toast disabled
+      // toast({
+      //   title: "Article updated successfully",
+      //   description: "Your article changes have been saved.",
+      // });
+
       setFormData(initialFormData);
       setOpenCreateArticleDialog(false);
       setCurrentEditedId(null);
@@ -190,14 +276,15 @@ function AdminArticles() {
         image: uploadedImageUrl || "https://via.placeholder.com/800x450",
         publishedDate: new Date().toISOString(),
       };
-      
+
       setArticleList(prevList => [newArticle, ...prevList]); // Add to beginning for latest first
-      
-      toast({
-        title: "Article published successfully",
-        description: "Your article is now live on the news channel.",
-      });
-      
+
+      // BACKEND: Toast disabled
+      // toast({
+      //   title: "Article published successfully",
+      //   description: "Your article is now live on the news channel.",
+      // });
+
       setOpenCreateArticleDialog(false);
       setImageFile(null);
       setFormData(initialFormData);
@@ -228,16 +315,17 @@ function AdminArticles() {
 
   function handleDelete(getCurrentArticleId) {
     console.log(getCurrentArticleId);
-    
+
     // STATIC: Delete article locally
-    setArticleList(prevList => 
+    setArticleList(prevList =>
       prevList.filter(article => article._id !== getCurrentArticleId)
     );
-    
-    toast({
-      title: "Article deleted",
-      description: "The article has been removed from the news channel.",
-    });
+
+    // BACKEND: Toast disabled
+    // toast({
+    //   title: "Article deleted",
+    //   description: "The article has been removed from the news channel.",
+    // });
 
     /* BACKEND: Original Redux delete dispatch
     dispatch(deleteProducts({ id: getCurrentArticleId })).then(data => {
@@ -251,8 +339,8 @@ function AdminArticles() {
 
   function isFormValid() {
     // For articles, we need at least title, summary, content, category, and author
-    const requiredFields = ['title', 'summary', 'content', 'category', 'author'];
-    return requiredFields.every(field => formData[field] && formData[field].trim() !== '');
+    const requiredFields = ["title", "summary", "content", "category", "author"];
+    return requiredFields.every(field => formData[field] && formData[field].trim() !== "");
   }
 
   // BACKEND: Original fetch on mount disabled
@@ -272,22 +360,22 @@ function AdminArticles() {
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {articleList && articleList.length > 0 ? 
+        {articleList && articleList.length > 0 ? (
           articleList.map(articleItem => (
-            <AdminProductsTile 
-              key={articleItem._id} 
-              setFormData={setFormData} 
-              setOpenCreateProductsDialog={setOpenCreateArticleDialog} 
-              setCurrentEditedId={setCurrentEditedId} 
+            <AdminProductsTile
+              key={articleItem._id}
+              setFormData={setFormData}
+              setOpenCreateProductsDialog={setOpenCreateArticleDialog}
+              setCurrentEditedId={setCurrentEditedId}
               product={articleItem} // Component still uses 'product' prop name
               handleDelete={handleDelete}
             />
-          )) : (
-            <div className="col-span-full text-center py-10">
-              <p className="text-gray-500">No articles yet. Click "Write New Article" to get started.</p>
-            </div>
-          )
-        }
+          ))
+        ) : (
+          <div className="col-span-full text-center py-10">
+            <p className="text-gray-500">No articles yet. Click "Write New Article" to get started.</p>
+          </div>
+        )}
       </div>
       <Sheet
         open={openCreateArticleDialog}
@@ -305,7 +393,9 @@ function AdminArticles() {
               {currentEditedId !== null ? "Edit Article" : "Write New Article"}
             </SheetTitle>
           </SheetHeader>
-          <ProductImageUpload
+
+          {/* BACKEND: ProductImageUpload disabled - image upload not functional in static mode */}
+          {/* <ProductImageUpload
             imageFile={imageFile}
             setImageFile={setImageFile}
             uploadedImageUrl={uploadedImageUrl}
@@ -313,7 +403,8 @@ function AdminArticles() {
             setImageLoadingState={setImageLoadingState}
             imageLoadingState={imageLoadingState}
             isEditMode={currentEditedId !== null}
-          />
+          /> */}
+
           <div className="py-6">
             <CommonForm
               onSubmit={onSubmit}
