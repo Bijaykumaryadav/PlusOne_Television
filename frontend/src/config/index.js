@@ -2,7 +2,7 @@
    ADMIN AUTH CONFIG
 ===================================================== */
 
-export const registerFormControls = [
+export const loginFormControls = [
     {
         name: 'userName',
         label: "User Name",

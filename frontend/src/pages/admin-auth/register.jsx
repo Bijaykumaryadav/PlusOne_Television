@@ -1,6 +1,6 @@
 import CommonForm from "@/components/common/form";
 import { toast } from "sonner";
-import { registerFormControls } from "@/config";
+import { loginFormControls } from "@/config";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
@@ -66,7 +66,7 @@ function AdminRegister() {
 
       {/* Form */}
       <CommonForm
-        formControls={registerFormControls}
+        formControls={loginFormControls}
         buttonText="Sign Up"
         formData={formData}
         setFormData={setFormData}

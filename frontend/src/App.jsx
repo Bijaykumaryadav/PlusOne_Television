@@ -16,7 +16,7 @@ function App() {
         {/* Home Route */}
         <Route path="/" element={<PlusOneTV />} />
 
-        <Route path="admin" element={<AdminAuthLayout />}>
+        <Route path="/auth/admin" element={<AdminAuthLayout />}>
           <Route path="login" element={<AdminLogin />} />
           <Route path="register" element={<AdminRegister />} />
         </Route>
