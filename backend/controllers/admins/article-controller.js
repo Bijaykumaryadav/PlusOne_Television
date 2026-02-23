@@ -1,4 +1,4 @@
-const Article = require("../models/Article");
+const Article = require("../../models/article");
 
 // @desc    Get all articles
 // @route   GET /api/articles

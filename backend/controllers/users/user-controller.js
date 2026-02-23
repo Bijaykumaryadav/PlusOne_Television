@@ -4,7 +4,7 @@ const { sendResponse } = require("../../utils/sendResponse");
 const {
   setInitialProfilePicture,
 } = require("../../utils/setInitialProfilePicture");
-const Otp = require("../../models/otpSchema");
+const Otp = require("../../models/otp-schema");
 const User = require("../../models/userSchema");
 const { verifyUserEmail } = require("../../mailers/verifyUserEmail");
 const { generateOTP } = require("../../utils/generateOtp");

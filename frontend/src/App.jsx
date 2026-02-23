@@ -9,8 +9,26 @@ import AdminAuthLayout from "./components/admin-auth/layout";
 import AdminLogin from "@/pages/admin-auth/login";
 import AdminRegister from "@/pages/admin-auth/register";
 import AdminArticles from "./pages/admin-view/admin-article";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { restoreSession, authSelector } from "./features/admin/auth-slice";
 
 function App() {
+  const dispatch = useDispatch();
+  const { isSessionRestoring } = useSelector(authSelector);
+
+  useEffect(() => {
+    dispatch(restoreSession());
+  }, [dispatch]);
+
+   if (isSessionRestoring) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="loading-spinner" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Routes>

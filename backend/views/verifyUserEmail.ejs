@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification - Ecommerce</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #e9ecef;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        background-color: #ffffff;
+        margin: 0 auto;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .container h2 {
+        color: #343a40;
+        margin-bottom: 20px;
+      }
+
+      .container p {
+        color: #495057;
+        font-size: 16px;
+        line-height: 1.5;
+        margin: 0 0 15px;
+      }
+
+      .otp-box {
+        font-size: 20px;
+        background-color: #d9d9d9;
+        color: #ffffff;
+        padding: 15px;
+        display: inline-block;
+        border-radius: 8px;
+        letter-spacing: 2px;
+        transition: all 0.2s ease-in-out;
+      }
+
+      .otp-box:hover {
+        background-color: #f8f9fa;
+        color: blue;
+        border: 2px solid blue;
+      }
+
+      .app-name {
+        font-size: 22px;
+        color: #495057;
+        margin-bottom: 25px;
+        font-weight: bold;
+      }
+
+      .cta-text {
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 25px;
+      }
+
+      /* Matching Button Styles (from login page) */
+      .action-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .action-btn:hover {
+        background-color: #0056b3;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+          margin: 10px;
+        }
+
+        .otp-box {
+          font-size: 18px;
+          padding: 10px;
+        }
+
+        .cta-text {
+          font-size: 12px;
+        }
+
+        .action-btn {
+          padding: 10px 20px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- App name or logo -->
+      <div class="app-name">Welcome to the Ecommerce</div>
+
+      <!-- Email verification header -->
+      <h2>Verify Your Email to Continue</h2>
+
+      <!-- OTP display -->
+      <p>Your One-Time Password (OTP) is:</p>
+      <p
+        id="otpValue"
+        class="otp-box"
+        style="user-select: all;"  <!-- Making it easier for manual copy -->
+      >
+        <%= otp %>
+      </p>
+
+      <!-- Call to action with Login page style button -->
+      <p class="cta-text">
+        Otp Will be expired within 5 minutes.
+      </p>
+      <button class="action-btn">Go to Ecommerce</button>
+    </div>
+  </body>
+</html>

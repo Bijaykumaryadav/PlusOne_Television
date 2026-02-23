@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import adminAuthReducer from "../features/admin/auth-slice";
+import authReducer from "../features/admin/auth-slice";
+import { injectStore } from "../services/axiosInstance";
 
 export const store = configureStore({
   reducer: {
-    adminAuth: adminAuthReducer,
+    adminAuth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -11,5 +12,5 @@ export const store = configureStore({
     }),
   devTools: process.env.NODE_ENV !== "production",
 });
-
+injectStore(store);
 export default store;

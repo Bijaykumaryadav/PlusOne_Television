@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const Otp = require("../models/otpSchema");
+const Otp = require("../models/otp-schema");
 
 module.exports.generateOTP = async (userId) => {
   const otp = crypto.randomInt(100000, 999999);
