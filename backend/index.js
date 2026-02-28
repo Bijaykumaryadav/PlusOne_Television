@@ -9,31 +9,40 @@ require("./middleware/passport-jwt-strategy");
 const cors = require("cors");
 const path = require("path");
 
-// for routes to accept the json files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL], // Allow specific origin from environment variable
+  origin: [process.env.FRONTEND_URL],
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
   exposedHeaders: ["Content-Disposition", "Content-Type"],
-  allowedHeaders: ["Authorization", "Content-Type"], // Explicitly allow Authorization header
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  allowedHeaders: ["Authorization", "Content-Type"],
+  credentials: true,
 };
 
-// Apply CORS middleware
 app.use(cors(corsOptions));
 
+// ✅ Add express-session BEFORE passport middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === "production", // true only in production (HTTPS)
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
-//for using passport
+// ✅ Passport middleware AFTER session
 app.use(passport.initialize());
 app.use(passport.session());
+
 dbConnection();
 
-app.use("/apis/v1",require("./routes"));
+app.use("/apis/v1", require("./routes"));
 
-app.listen(port,() => {
-    console.log(`Server is running on port ${port}`);
-})
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

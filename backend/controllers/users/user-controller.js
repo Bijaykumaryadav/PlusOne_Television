@@ -411,3 +411,51 @@ module.exports.sendUserDetails = async (req, res) => {
     return sendResponse(res, 500, false, "Error in fetching user details", null, { error });
   }
 };
+
+// Get all admin users (protected)
+module.exports.getAdmins = async (req, res) => {
+  try {
+    // Optional: enforce that requester is admin
+    // req.user is populated by passport.authenticate('jwt') when used as middleware
+    if (req.user && req.user.role !== 'admin') {
+      return sendResponse(res, 403, false, 'Forbidden');
+    }
+
+    const admins = await User.find({ role: 'admin' }).select('name email profileImage role');
+    return sendResponse(res, 200, true, 'Admins fetched', { admins }, null);
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+    return sendResponse(res, 500, false, 'Error fetching admins');
+  }
+};
+
+// Simple refresh endpoint placeholder. If you later implement httpOnly refresh tokens,
+// replace this with proper logic to validate the refresh token/cookie and issue a new access token.
+module.exports.refresh = async (req, res) => {
+  return sendResponse(res, 401, false, "No active session", null, null);
+};
+
+// Logout: destroy server session and clear cookies
+module.exports.logout = async (req, res) => {
+  try {
+    // If using express-session, destroy it
+    if (req.session) {
+      req.session.destroy((err) => {
+        // Clear the session cookie regardless
+        res.clearCookie('connect.sid');
+        if (err) {
+          console.error('Error destroying session during logout:', err);
+        }
+        return sendResponse(res, 200, true, 'Logged out successfully', null, null);
+      });
+    } else {
+      // No session used; still attempt to clear any refresh cookie
+      res.clearCookie('connect.sid');
+      res.clearCookie('refreshToken');
+      return sendResponse(res, 200, true, 'Logged out successfully', null, null);
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+    return sendResponse(res, 500, false, 'Logout failed', null, { error });
+  }
+};

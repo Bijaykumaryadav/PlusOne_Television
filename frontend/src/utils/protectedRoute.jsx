@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
-import { authSelector } from "../store/slices/authSlice";
+import { authSelector } from "../features/admin/auth-slice";
 
 /**
  * ProtectedRoute
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const { isAuthenticated, user } = useSelector(authSelector);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth/admin/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {

@@ -1,17 +1,11 @@
-import React, { Fragment, useState } from "react";
-// import { useSelector, useDispatch } from "react-redux"; // BACKEND: Redux disabled
+import React, { Fragment, useState, useEffect } from "react";
+import privateClient, { publicClient } from '@/services/axiosInstance';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import CommonForm from "@/components/Common/form";
-// import ProductImageUpload from "@/components/AdminView/ImageUpload"; // BACKEND: Image upload disabled
-// import { addProductFormElements } from "@/config"; // BACKEND: Original config
-// BACKEND: Redux actions disabled
-// import { addNewProducts, editProducts, fetchAllProducts, deleteProducts } from "@/features/admin/productSlice";
-// import { useToast } from "@/hooks/use-toast";
-// import AdminProductsTile from "../../components/AdminView/ProductTile"; // STATIC: Defined inline below
 
-// STATIC: Inline AdminProductsTile component (replaces imported AdminProductsTile)
+// Small tile component used to render article cards in the admin grid
 function AdminProductsTile({ product, setFormData, setOpenCreateProductsDialog, setCurrentEditedId, handleDelete }) {
   const categoryColors = {
     breaking: "bg-red-100 text-red-700",
@@ -95,7 +89,6 @@ function AdminProductsTile({ product, setFormData, setOpenCreateProductsDialog, 
   );
 }
 
-// STATIC: Article form configuration for news channel
 const articleFormElements = [
   {
     label: "Article Title",
@@ -168,46 +161,7 @@ function AdminArticles() {
     featured: "no",
   };
 
-  // STATIC: Mock article data stored in state
-  const [articleList, setArticleList] = useState([
-    {
-      _id: "1",
-      image: "https://via.placeholder.com/800x450",
-      title: "Breaking: Major Economic Policy Announced",
-      summary: "Government unveils new economic reforms aimed at boosting growth and creating jobs in the manufacturing sector.",
-      content: "In a press conference today, officials announced comprehensive economic reforms...",
-      category: "business",
-      author: "John Smith",
-      tags: "economy, policy, government",
-      featured: "yes",
-      publishedDate: new Date().toISOString(),
-    },
-    {
-      _id: "2",
-      image: "https://via.placeholder.com/800x450",
-      title: "Tech Giants Unveil AI Innovation",
-      summary: "Leading technology companies showcase groundbreaking artificial intelligence developments at annual summit.",
-      content: "The tech industry gathered today to present the latest advancements in AI technology...",
-      category: "technology",
-      author: "Sarah Johnson",
-      tags: "AI, technology, innovation",
-      featured: "no",
-      publishedDate: new Date().toISOString(),
-    },
-    {
-      _id: "3",
-      image: "https://via.placeholder.com/800x450",
-      title: "International Climate Summit Concludes",
-      summary: "World leaders agree on new climate action framework with ambitious emission reduction targets.",
-      content: "After days of intense negotiations, representatives from over 190 countries reached consensus...",
-      category: "world",
-      author: "Michael Chen",
-      tags: "climate, environment, international",
-      featured: "yes",
-      publishedDate: new Date().toISOString(),
-    },
-  ]);
-
+  const [articleList, setArticleList] = useState([]);
   const [openCreateArticleDialog, setOpenCreateArticleDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
@@ -215,138 +169,87 @@ function AdminArticles() {
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  // BACKEND: Redux state disabled - using local state instead
-  // const { productList, isLoading } = useSelector((state) => state.adminProducts);
-  // const dispatch = useDispatch();
-  const isLoading = false; // STATIC: No loading state needed
+  const isLoading = false;
 
-  // const { toast } = useToast(); // BACKEND: Toast notifications disabled
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
-  function onSubmit(event) {
+  useEffect(() => {
+    // when imageFile is set, upload to backend
+    if (!imageFile) return;
+
+    const upload = async () => {
+      try {
+        setImageLoadingState(true);
+  const fd = new FormData();
+  fd.append('image', imageFile);
+        const { data } = await privateClient.post('/admin/articles/upload', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        if (data && data.data && data.data.url) {
+          setUploadedImageUrl(data.data.url);
+        } else if (data && data.url) {
+          setUploadedImageUrl(data.url);
+        }
+      } catch (err) {
+        console.error('Upload failed', err);
+      } finally {
+        setImageLoadingState(false);
+      }
+    };
+
+    upload();
+  }, [imageFile]);
+
+  async function fetchArticles() {
+    try {
+      const { data } = await privateClient.get('/admin/articles');
+      setArticleList(data.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function isFormValid() {
+    const requiredFields = ["title", "summary", "content", "category", "author"];
+    return requiredFields.every(field => formData[field] && formData[field].toString().trim() !== "");
+  }
+
+  async function onSubmit(event) {
     event.preventDefault();
 
-    if (currentEditedId !== null) {
-      // STATIC: Edit article locally
-      setArticleList(prevList =>
-        prevList.map(article =>
-          article._id === currentEditedId
-            ? {
-                ...article,
-                ...formData,
-                image: uploadedImageUrl || article.image,
-                updatedDate: new Date().toISOString(),
-              }
-            : article
-        )
-      );
+    try {
+      if (currentEditedId !== null) {
+        const payload = { ...formData, image: uploadedImageUrl || formData.image };
+        await privateClient.put(`/admin/articles/${currentEditedId}`, payload);
+      } else {
+        const payload = { ...formData, image: uploadedImageUrl };
+        await privateClient.post('/admin/articles', payload);
+      }
 
-      // BACKEND: Toast disabled
-      // toast({
-      //   title: "Article updated successfully",
-      //   description: "Your article changes have been saved.",
-      // });
-
+      // Reset and refresh
       setFormData(initialFormData);
       setOpenCreateArticleDialog(false);
+      setImageFile(null);
+      setUploadedImageUrl("");
       setCurrentEditedId(null);
-      setUploadedImageUrl("");
-      setImageFile(null);
-
-      /* BACKEND: Original Redux edit dispatch
-      dispatch(
-        editProducts({
-          id: currentEditedId,
-          formData,
-        })
-      ).then((data) => {
-        console.log(data, "edit");
-        if (data?.payload) {
-          dispatch(fetchAllProducts());
-          setFormData(initialFormData);
-          setOpenCreateArticleDialog(false);
-          setCurrentEditedId(null);
-        }
-      });
-      */
-    } else {
-      // STATIC: Add new article locally
-      const newArticle = {
-        _id: Date.now().toString(), // Simple ID generation
-        ...formData,
-        image: uploadedImageUrl || "https://via.placeholder.com/800x450",
-        publishedDate: new Date().toISOString(),
-      };
-
-      setArticleList(prevList => [newArticle, ...prevList]); // Add to beginning for latest first
-
-      // BACKEND: Toast disabled
-      // toast({
-      //   title: "Article published successfully",
-      //   description: "Your article is now live on the news channel.",
-      // });
-
-      setOpenCreateArticleDialog(false);
-      setImageFile(null);
-      setFormData(initialFormData);
-      setUploadedImageUrl("");
-
-      /* BACKEND: Original Redux add dispatch
-      dispatch(
-        addNewProducts({
-          ...formData,
-          image: uploadedImageUrl,
-        })
-      ).unwrap()
-      .then((data) => {
-        console.log("data", data);
-        if (data) {
-          dispatch(fetchAllProducts());
-          setOpenCreateArticleDialog(false);
-          setImageFile(null);
-          setFormData(initialFormData);
-          toast({
-            title: "Product add successfully",
-          });
-        }
-      });
-      */
+      fetchArticles();
+    } catch (err) {
+      console.error(err);
     }
   }
 
   function handleDelete(getCurrentArticleId) {
-    console.log(getCurrentArticleId);
-
-    // STATIC: Delete article locally
-    setArticleList(prevList =>
-      prevList.filter(article => article._id !== getCurrentArticleId)
-    );
-
-    // BACKEND: Toast disabled
-    // toast({
-    //   title: "Article deleted",
-    //   description: "The article has been removed from the news channel.",
-    // });
-
-    /* BACKEND: Original Redux delete dispatch
-    dispatch(deleteProducts({ id: getCurrentArticleId })).then(data => {
-      console.log("payload is", data);
-      if (data?.payload) {
-        dispatch(fetchAllProducts());
+    (async () => {
+      try {
+        await privateClient.delete(`/admin/articles/${getCurrentArticleId}`);
+        fetchArticles();
+      } catch (err) {
+        console.error(err);
       }
-    });
-    */
+    })();
   }
-
-  function isFormValid() {
-    // For articles, we need at least title, summary, content, category, and author
-    const requiredFields = ["title", "summary", "content", "category", "author"];
-    return requiredFields.every(field => formData[field] && formData[field].trim() !== "");
-  }
-
-  // BACKEND: Original fetch on mount disabled
-  // useEffect(() => {
-  //   dispatch(fetchAllProducts());
-  // }, [dispatch]);
 
   return (
     <Fragment>
@@ -359,6 +262,7 @@ function AdminArticles() {
           Write New Article
         </Button>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {articleList && articleList.length > 0 ? (
           articleList.map(articleItem => (
@@ -367,7 +271,7 @@ function AdminArticles() {
               setFormData={setFormData}
               setOpenCreateProductsDialog={setOpenCreateArticleDialog}
               setCurrentEditedId={setCurrentEditedId}
-              product={articleItem} // Component still uses 'product' prop name
+              product={articleItem}
               handleDelete={handleDelete}
             />
           ))
@@ -377,6 +281,7 @@ function AdminArticles() {
           </div>
         )}
       </div>
+
       <Sheet
         open={openCreateArticleDialog}
         onOpenChange={() => {
@@ -394,17 +299,6 @@ function AdminArticles() {
             </SheetTitle>
           </SheetHeader>
 
-          {/* BACKEND: ProductImageUpload disabled - image upload not functional in static mode */}
-          {/* <ProductImageUpload
-            imageFile={imageFile}
-            setImageFile={setImageFile}
-            uploadedImageUrl={uploadedImageUrl}
-            setUploadedImageUrl={setUploadedImageUrl}
-            setImageLoadingState={setImageLoadingState}
-            imageLoadingState={imageLoadingState}
-            isEditMode={currentEditedId !== null}
-          /> */}
-
           <div className="py-6">
             <CommonForm
               onSubmit={onSubmit}
@@ -414,6 +308,33 @@ function AdminArticles() {
               formControls={articleFormElements}
               isBtnDisabled={!isFormValid()}
             />
+
+            {/* Image upload control placed below the form */}
+            <div className="p-4 border rounded-md mt-4">
+              <label className="block text-sm font-medium text-gray-700">Feature Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] || null;
+                  setImageFile(f);
+                }}
+                className="mt-1"
+              />
+
+              <div className="mt-2">
+                {imageLoadingState ? (
+                  <span className="text-sm text-gray-600">Uploading image...</span>
+                ) : uploadedImageUrl ? (
+                  <div className="flex items-center gap-2">
+                    <img src={uploadedImageUrl} alt="uploaded" className="w-24 h-16 object-cover rounded" />
+                    <span className="text-sm text-green-600">Image uploaded</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-gray-500">No image uploaded yet. Select a file to upload.</span>
+                )}
+              </div>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

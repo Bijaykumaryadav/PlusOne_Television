@@ -2,12 +2,28 @@ import axios from "axios";
 // import { store } from "../store/store";
 import { setAccessToken, logout } from "../features/admin/auth-slice";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/apis/v1/";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/apis/v1/";
 
 let store;
 
 export const injectStore = (_store) => {
   store = _store;
+  // Keep Authorization header in sync with in-memory access token.
+  // This ensures that when the token is cleared (logout / refresh failure),
+  // the header is removed and subsequent requests don't keep sending an invalid token.
+  store.subscribe(() => {
+    try {
+      const accessToken = store.getState().adminAuth?.accessToken;
+      if (accessToken) {
+        privateClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+      } else {
+        // Remove header when not authenticated
+        delete privateClient.defaults.headers.common["Authorization"];
+      }
+    } catch (err) {
+      // ignore if store shape not yet available
+    }
+  });
 };
 
 // ─── Public client (no auth) ──────────────────────────────────────────────────

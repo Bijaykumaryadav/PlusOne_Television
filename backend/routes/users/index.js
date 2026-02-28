@@ -20,6 +20,8 @@ router.post("/verify", verifyUser);
 router.post("/resend-signupotp", resendSignupOtp);
 router.post("/resend-resetotp", resendResetOtp);
 router.post("/signin", signInUser);
+router.post("/auth/refresh", require("../../controllers/users/user-controller").refresh);
+router.post("/auth/logout", require("../../controllers/users/user-controller").logout);
 
 router.get(
   "/auth/google",
@@ -42,6 +44,13 @@ router.get(
   "/auth",
   passport.authenticate("jwt", { session: false }),
   sendUserDetails
+);
+
+// Get all admins (protected)
+router.get(
+  "/admins",
+  passport.authenticate("jwt", { session: false }),
+  require("../../controllers/users/user-controller").getAdmins
 );
 
 module.exports = router;

@@ -1,4 +1,6 @@
 const Article = require("../../models/article");
+const cloudinary = require("../../config/cloudinary");
+const streamifier = require('streamifier');
 
 // @desc    Get all articles
 // @route   GET /api/articles
@@ -135,6 +137,21 @@ const createArticle = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+// Upload image via Cloudinary (multer memory storage)
+const uploadImage = (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, message: 'No file provided' });
+
+  const uploadStream = cloudinary.uploader.upload_stream(
+    { folder: 'articles' },
+    (error, result) => {
+      if (error) return res.status(500).json({ success: false, message: 'Upload failed', error });
+      return res.status(200).json({ success: true, url: result.secure_url });
+    }
+  );
+
+  streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
 };
 
 // @desc    Update article
@@ -300,4 +317,5 @@ module.exports = {
   deleteArticle,
   searchArticles,
   getFeaturedArticles,
+  uploadImage,
 };

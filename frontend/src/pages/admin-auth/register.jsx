@@ -1,9 +1,11 @@
 import CommonForm from "@/components/common/form";
 import { toast } from "sonner";
 import { registerFormControls } from "@/config";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, authSelector } from "@/features/admin/auth-slice";
 
 const initialState = {
   userName: "",
@@ -16,11 +18,12 @@ const initialState = {
 function AdminRegister() {
   const [formData, setFormData] = useState(initialState);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auth = useSelector(authSelector);
 
   async function onSubmit(event) {
     event.preventDefault();
 
-    // 🚀 Temporary frontend-only simulation
     if (!formData.userName || !formData.email || !formData.password) {
       toast.error("Please fill all required fields", {
         duration: 3000,
@@ -28,15 +31,33 @@ function AdminRegister() {
       return;
     }
 
-    toast.success("Registration successful! (Frontend Only)", {
-      duration: 3000,
-    });
+    try {
+      await dispatch(
+        registerUser({
+          userName: formData.userName,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role || "admin",
+        })
+      ).unwrap();
 
-    // Redirect to login page
-    setTimeout(() => {
-      navigate("/auth/admin/login");
-    }, 1500);
+      toast.success("Registration successful. Please verify your email.", { duration: 2000 });
+      navigate("/auth/admin/verify-otp", { state: { email: formData.email } });
+    } catch (err) {
+      // If backend indicates the account exists but needs verification, send user to verify page
+      const msg = err || "Registration failed";
+      toast.error(msg, { duration: 3000 });
+      if (typeof msg === "string" && msg.toLowerCase().includes("verify")) {
+        navigate("/auth/admin/verify-otp", { state: { email: formData.email } });
+      }
+    }
   }
+
+  useEffect(() => {
+    if (auth.error) {
+      toast.error(auth.error, { duration: 3000 });
+    }
+  }, [auth.error]);
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
@@ -71,7 +92,7 @@ function AdminRegister() {
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}
-        isBtnDisabled={false}
+        isBtnDisabled={auth.isLoading}
       />
 
       {/* Social Login UI Only */}

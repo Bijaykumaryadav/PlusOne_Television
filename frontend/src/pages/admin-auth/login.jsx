@@ -1,31 +1,45 @@
 import CommonForm from "@/components/common/form";
 import { toast } from "sonner";
 import { loginFormControls } from "@/config";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, authSelector } from "@/features/admin/auth-slice";
 
 function AdminLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const dispatch = useDispatch();           
+  const auth = useSelector(authSelector);
 
   async function onSubmit(event) {
     event.preventDefault();
 
-    // 🔹 Frontend-only simulation
     if (!formData.email || !formData.password) {
       toast.error("Please fill all required fields", { duration: 3000 });
       return;
     }
 
-    toast.success("Login successful! (Frontend Only)", { duration: 2000 });
+    try {
+      await dispatch(
+        loginUser({ email: formData.email, password: formData.password })
+      ).unwrap();
 
-    // Redirect to admin dashboard after 1s
-    setTimeout(() => {
+      toast.success("Login successful", { duration: 2000 });
       navigate("/admin/dashboard");
-    }, 1000);
+    } catch (err) {
+      toast.error(err || "Login failed", { duration: 3000 });
+    }
   }
+
+  // Show backend errors from slice
+  useEffect(() => {
+    if (auth.error) {
+      toast.error(auth.error, { duration: 3000 });
+    }
+  }, [auth.error]);
 
   return (
     <motion.div
@@ -63,7 +77,7 @@ function AdminLogin() {
           formData={formData}
           setFormData={setFormData}
           onSubmit={onSubmit}
-          isBtnDisabled={false}
+          isBtnDisabled={auth.isLoading}
         />
 
         {/* Sign Up Link */}

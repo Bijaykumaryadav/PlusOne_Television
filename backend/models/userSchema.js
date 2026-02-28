@@ -29,23 +29,26 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["users","admin","seller"],
+      enum: ["users","admin"],
       default: "admin"
     }
   },
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+// Use async/await pattern for pre-save hook. When using an async function
+// Mongoose will handle the promise — do not declare `next` or call it.
+userSchema.pre("save", async function () {
   try {
     if (!this.isModified("password")) {
-      return next();
+      return;
     }
-    let hashedPassword = await bcrypt.hash(this.password, 10);
+
+    const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
-    return next();
   } catch (err) {
-    return next(err);
+    // Throwing the error will reject the save() promise and propagate the error
+    throw err;
   }
 });
 

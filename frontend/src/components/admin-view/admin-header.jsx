@@ -1,6 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "../ui/button";
 import { AlignJustify, LogOut } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "@/features/admin/auth-slice";
+import privateClient from "@/services/axiosInstance";
+// sonner toast is optional; guard import in case it's not installed
+let toast;
+try {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  toast = require("@/components/ui/sonner").useToast?.() || require("sonner").toast;
+} catch (e) {
+  toast = null;
+}
 
 function AdminHeader({ setOpen }) {
   // useEffect(() => {
@@ -13,9 +25,29 @@ function AdminHeader({ setOpen }) {
   //   if (body) body.style.paddingTop = "0px";
   // }, []);
 
-  // Temporary logout handler
-  function handleLogout() {
-    console.log("Logout clicked (not integrated yet)");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (err) {
+      // ignore server errors but continue to clear client state
+    }
+
+    // Clear localStorage and axios header
+    try {
+      localStorage.removeItem("accessToken");
+    } catch (e) {}
+    try {
+      delete privateClient.defaults.headers.common["Authorization"];
+    } catch (e) {}
+
+    if (toast) {
+      try { toast.success && toast.success("Signed out"); } catch (e) {}
+    }
+
+    navigate("/auth/admin/login", { replace: true });
   }
 
   return (
