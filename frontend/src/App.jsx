@@ -4,9 +4,9 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import NotFound from "@/pages/not-found";
 import ArticlesList from "@/pages/articles";
 import ArticleDetail from "@/pages/articles/[id]";
-import Header from "@/components/home/Header";
-import Hero from "@/components/home/Hero";
-import Footer from "@/components/home/Footer";
+// import Header from "@/components/home/Header";
+// import Hero from "@/components/home/Hero";
+// import Footer from "@/components/home/Footer";
 import AdminLayout from "@/components/admin-view/admin-layout";
 import AdminDashboard from "@/pages/admin-view/admin-dashboard";
 import ProtectedRoute from "@/utils/protectedRoute";
@@ -18,6 +18,7 @@ import AdminArticles from "./pages/admin-view/admin-article";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { restoreSession, authSelector } from "./features/admin/auth-slice";
+import UsersDashboard from "./pages/users-view/users-dashboard";
 
 function App() {
   const dispatch = useDispatch();
@@ -48,7 +49,7 @@ function App() {
     <div className="min-h-screen bg-white">
       <Routes>
         {/* Home Route */}
-        <Route path="/" element={<HomeShell />} />
+        <Route path="/" element={<UsersDashboard />} />
   <Route path="/articles" element={<ArticlesList />} />
   <Route path="/articles/:id" element={<ArticleDetail />} />
 

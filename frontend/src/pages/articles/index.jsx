@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { publicClient } from '@/services/axiosInstance';
-import RecentArticles from '@/components/home/RecentArticles';
+// import RecentArticles from '@/components/home/RecentArticles';
 
 const ArticlesList = () => {
   const [articles, setArticles] = useState([]);
@@ -23,7 +23,7 @@ const ArticlesList = () => {
   return (
     <div className="max-w-7xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Latest Articles</h1>
-      <RecentArticles articles={articles} />
+      {/* <RecentArticles articles={articles} /> */}
     </div>
   );
 };
