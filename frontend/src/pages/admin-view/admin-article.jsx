@@ -3,7 +3,7 @@ import privateClient, { publicClient } from '@/services/axiosInstance';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import CommonForm from "@/components/Common/form";
+import CommonForm from "@/components/common/form";
 
 // Small tile component used to render article cards in the admin grid
 function AdminProductsTile({ product, setFormData, setOpenCreateProductsDialog, setCurrentEditedId, handleDelete }) {
