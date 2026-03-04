@@ -43,7 +43,7 @@ export default function UsersHeader() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 no-underline min-w-max hover:opacity-80 transition-opacity">
             <img src="/logo.svg" alt="PlusOne" className="h-10 w-10" />
-            <span className="text-lg font-bold text-gray-900 hidden sm:inline">PlusOne Television</span>
+            <span className="text-lg font-bold text-gray-900 hidden sm:inline">Sidha Reporting</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -128,7 +128,7 @@ export default function UsersHeader() {
               </DropdownMenu>
             ) : (
               <Button asChild className="bg-red-600 hover:bg-red-700">
-                <Link to="/auth/login">Login</Link>
+                <Link to="/auth/login" className="word-wrap">Advertise with us/Sponsor us</Link>
               </Button>
             )}
 

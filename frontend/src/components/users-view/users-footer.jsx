@@ -41,7 +41,7 @@ export default function UsersFooter() {
             <div>
               <h4 className="text-white font-bold text-lg mb-4">About Us</h4>
               <p className="text-sm leading-relaxed mb-4">
-                PlusOne Television is a leading news media platform dedicated to bringing you the latest, most accurate news from around the world.
+                Sidha Reporting is a leading news media platform dedicated to bringing you the latest, most accurate news from around the world.
               </p>
               <div className="flex gap-3">
                 {[
@@ -109,15 +109,15 @@ export default function UsersFooter() {
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 mt-1 text-red-500 flex-shrink-0" />
-                  <span>info@plusonetvision.com</span>
+                  <span>binarybytebishal267@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-red-500 flex-shrink-0" />
-                  <span>+1 (800) 123-4567</span>
+                  <span>+977 9804211151</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 mt-1 text-red-500 flex-shrink-0" />
-                  <span>New York, USA</span>
+                  <span>Birgunj,Parsa,Nepal</span>
                 </div>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function UsersFooter() {
 
           {/* Footer Bottom */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 text-sm">
-            <p>&copy; {currentYear} PlusOne Television. All rights reserved.</p>
+            <p>&copy; {currentYear} Sidha Reporting. All rights reserved.</p>
             <div className="flex gap-4">
               {[
                 { label: 'Privacy Policy', href: '#privacy' },
