@@ -1,13 +1,20 @@
 const express = require("express");
 const app = express();
 const dbConnection = require("./config/db");
-const port = 8000;
 const passport = require("passport");
 const session = require("express-session");
 require("./middleware/passport-google-strategy");
 require("./middleware/passport-jwt-strategy");
 const cors = require("cors");
 const path = require("path");
+// index.js – relevant excerpt
+let port;
+if (process.env.NODE_ENV === 'development') {
+  port = 8000;      // always use 8000 locally
+} else {
+  port = process.env.PORT || 8000;
+}
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -39,10 +46,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-dbConnection();
+dbConnection(); 
 
 app.use("/apis/v1", require("./routes"));
 
-app.listen(port,"0.0.0.", () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
 });

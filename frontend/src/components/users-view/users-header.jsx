@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Menu, X, Bell, User, LogOut } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
+import logo from '@/assets/logofinal.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +43,7 @@ export default function UsersHeader() {
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 no-underline min-w-max hover:opacity-80 transition-opacity">
-            <img src="/logo.svg" alt="PlusOne" className="h-10 w-10" />
+            <img src={logo} alt="Sidha Reporting" className="h-10 w-10" />
             <span className="text-lg font-bold text-gray-900 hidden sm:inline">Sidha Reporting</span>
           </Link>
 
@@ -87,6 +88,20 @@ export default function UsersHeader() {
               </Button>
             )}
 
+            {/* Premium/Upgrade Button */}
+            <Button asChild className="hidden sm:flex bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold gap-2">
+              <Link 
+                to="/payment" 
+                state={{ source: 'header', referrer: isAuthenticated ? 'premium' : 'advertiser' }}
+              >
+                <span>⭐</span>
+                <span className="hidden lg:inline">
+                  {isAuthenticated ? 'Upgrade Premium' : 'Advertise'}
+                </span>
+                <span className="lg:hidden">Premium</span>
+              </Link>
+            </Button>
+
             {/* User Menu */}
             {isAuthenticated ? (
               <DropdownMenu>
@@ -99,21 +114,31 @@ export default function UsersHeader() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
+                    <Link to="/profile" state={{ source: 'dropdown' }} className="cursor-pointer">
                       <User className="w-4 h-4 mr-2" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/bookmarks" className="cursor-pointer">
+                    <Link to="/bookmarks" state={{ source: 'dropdown' }} className="cursor-pointer">
                       <span className="mr-2">📌</span>
                       Saved Articles
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/preferences" className="cursor-pointer">
+                    <Link to="/preferences" state={{ source: 'dropdown' }} className="cursor-pointer">
                       <span className="mr-2">⚙️</span>
                       Preferences
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link 
+                      to="/payment" 
+                      state={{ source: 'dropdown', referrer: 'premium' }} 
+                      className="cursor-pointer"
+                    >
+                      <span className="mr-2">⭐</span>
+                      Upgrade Premium
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -127,8 +152,13 @@ export default function UsersHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild className="bg-red-600 hover:bg-red-700">
-                <Link to="/auth/login" className="word-wrap">Advertise with us/Sponsor us</Link>
+              <Button asChild className="sm:hidden bg-red-600 hover:bg-red-700">
+                <Link 
+                  to="/payment" 
+                  state={{ source: 'header-mobile', referrer: 'advertiser' }}
+                >
+                  Premium
+                </Link>
               </Button>
             )}
 

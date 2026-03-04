@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import NotFound from "@/pages/not-found";
 import ArticlesList from "@/pages/articles";
 import ArticleDetail from "@/pages/articles/[id]";
+import PaymentPage from "@/pages/payment";
 // import Header from "@/components/home/Header";
 // import Hero from "@/components/home/Hero";
 // import Footer from "@/components/home/Footer";
@@ -50,8 +51,9 @@ function App() {
       <Routes>
         {/* Home Route */}
         <Route path="/" element={<UsersDashboard />} />
-  <Route path="/articles" element={<ArticlesList />} />
-  <Route path="/articles/:id" element={<ArticleDetail />} />
+        <Route path="/articles" element={<ArticlesList />} />
+        <Route path="/articles/:id" element={<ArticleDetail />} />
+        <Route path="/payment" element={<PaymentPage />} />
 
         <Route path="/auth/admin" element={<AdminAuthLayout />}>
           <Route path="login" element={<AdminLogin />} />

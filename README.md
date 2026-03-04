@@ -146,7 +146,39 @@ http://localhost:5000
 
 ---
 
-## 🚧 Future Enhancements
+## 💸 Khalti Payment Gateway Integration
+
+To make payments easier for Nepali users, the project now integrates with the
+Khalti checkout widget instead of eSewa.  The flow is lightweight and only
+requires a public/secret key pair from Khalti’s developer dashboard.
+
+1. **Configure environment variables** in the backend `.env` file (see sample
+   values already added).  You’ll need your public & secret keys:
+
+   ```dotenv
+   KHALTI_PUBLIC_KEY=YOUR_PUBLIC_KEY_HERE
+   KHALTI_SECRET_KEY=YOUR_SECRET_KEY_HERE
+   KHALTI_PRODUCT_URL=http://localhost:5173   # optional
+   ```
+
+2. **Backend endpoints** (mounted under `/apis/v1/payments/khalti`):
+
+   * `POST /create` – accepts JSON `{ amount, pid }`, requests a payment token
+     from Khalti, and returns the token to the client.  The token is used by the
+     client-side widget to open the checkout.
+
+   (The old eSewa routes have been removed but can be re‑enabled if needed.)
+
+3. **Frontend**: the `/payment` page now loads Khalti’s JavaScript library and
+   initializes `KhaltiCheckout` when the user submits the form.  Clicking the
+   proceed button opens the Khalti modal with the specified amount.
+
+4. **Next steps**: verify the token on the server, persist order/payment records,
+   and send confirmation emails once verification succeeds.
+
+---
+
+## �🚧 Future Enhancements
 
 * Live streaming integration
 * Role-based access control

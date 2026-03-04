@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { publicClient } from '@/services/axiosInstance';
+import { Link, useNavigate } from 'react-router-dom';
 import UsersHeader from '../../components/users-view/users-header';
 import UsersFooter from '../../components/users-view/users-footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +13,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function UsersDashboard() {
   const [articles, setArticles] = useState([]);
+  const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useSelector(state => state.userAuth || {});
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchArticles();
@@ -22,61 +25,20 @@ export default function UsersDashboard() {
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      // API call placeholder
-      const mockArticles = [
-        {
-          _id: '1',
-          title: 'Breaking: Major Political Development Shakes Nation',
-          description: 'A significant political announcement has sent shockwaves through the nation today...',
-          thumbnail: 'https://via.placeholder.com/400x250?text=Politics',
-          category: 'Politics',
-          readTime: 5,
-          createdAt: new Date(),
-        },
-        {
-          _id: '2',
-          title: 'Tech Giants Announce Revolutionary AI Breakthrough',
-          description: 'Leading technology companies have unveiled groundbreaking artificial intelligence...',
-          thumbnail: 'https://via.placeholder.com/400x250?text=Technology',
-          category: 'Technology',
-          readTime: 4,
-          createdAt: new Date(),
-        },
-        {
-          _id: '3',
-          title: 'Stock Market Reaches New Heights',
-          description: 'Global financial markets report unprecedented growth in trading activity...',
-          thumbnail: 'https://via.placeholder.com/400x250?text=Business',
-          category: 'Business',
-          readTime: 6,
-          createdAt: new Date(),
-        },
-        {
-          _id: '4',
-          title: 'Sports: Championship Finals Draw Record Viewership',
-          description: 'The championship finals attracted millions of viewers from around the globe...',
-          thumbnail: 'https://via.placeholder.com/400x250?text=Sports',
-          category: 'Sports',
-          readTime: 5,
-          createdAt: new Date(),
-        },
-        {
-          _id: '5',
-          title: 'Entertainment: A-List Stars Debut New Film',
-          description: 'Hollywood\'s biggest names gathered for the premiere of the most anticipated film...',
-          thumbnail: 'https://via.placeholder.com/400x250?text=Entertainment',
-          category: 'Entertainment',
-          readTime: 4,
-          createdAt: new Date(),
-        },
-      ];
-      setArticles(mockArticles);
+      // Fetch featured and latest articles from backend
+      const [featuredRes, latestRes] = await Promise.all([
+        publicClient.get('/articles/featured?limit=3'),
+        publicClient.get('/articles?limit=10&page=1'),
+      ]);
+
+      if (featuredRes.data && featuredRes.data.data) setFeatured(featuredRes.data.data);
+      if (latestRes.data && latestRes.data.data) setArticles(latestRes.data.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching articles:', error);
       setLoading(false);
     }
-  };
+  }; 
 
   const trendingTopics = [
     { rank: 1, title: 'Political Crisis Deepens as New Evidence Emerges', shares: '2.5K' },
@@ -107,14 +69,14 @@ export default function UsersDashboard() {
                       </CardContent>
                     </Card>
                   ))
-                : articles.slice(0, 3).map(article => (
+                : (featured.length ? featured : articles.slice(0, 3)).map(article => (
                     <Card
                       key={article._id}
                       className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
                     >
                       <div className="relative overflow-hidden h-40">
                         <img
-                          src={article.thumbnail}
+                          src={article.thumbnail || article.image}
                           alt={article.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -193,7 +155,7 @@ export default function UsersDashboard() {
                             <div className="grid grid-cols-4 gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group">
                               <div className="col-span-1 overflow-hidden rounded h-24">
                                 <img
-                                  src={article.thumbnail}
+                                  src={article.thumbnail || article.image}
                                   alt={article.title}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 />
@@ -249,6 +211,21 @@ export default function UsersDashboard() {
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* premium subscription card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Premium Subscription</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/payment')}
+                  >
+                    Subscribe via eSewa
+                  </Button>
                 </CardContent>
               </Card>
 
