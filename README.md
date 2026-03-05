@@ -117,13 +117,13 @@ npm run dev
 Frontend runs on:
 
 ```
-http://localhost:5173
+http://72.60.223.137:5173
 ```
 
 Backend runs on:
 
 ```
-http://localhost:5000
+http://72.60.223.137:5000
 ```
 
 ---
@@ -158,7 +158,7 @@ requires a public/secret key pair from Khalti’s developer dashboard.
    ```dotenv
    KHALTI_PUBLIC_KEY=YOUR_PUBLIC_KEY_HERE
    KHALTI_SECRET_KEY=YOUR_SECRET_KEY_HERE
-   KHALTI_PRODUCT_URL=http://localhost:5173   # optional
+   KHALTI_PRODUCT_URL=http://72.60.223.137:5173   # optional
    ```
 
 2. **Backend endpoints** (mounted under `/apis/v1/payments/khalti`):

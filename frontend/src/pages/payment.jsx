@@ -36,7 +36,7 @@ export default function PaymentPage() {
       return;
     }
     try {
-      const base = import.meta.env.VITE_API_URL || "http://localhost:8000/apis/v1/";
+      const base = import.meta.env.VITE_API_URL || "http://72.60.223.137:8000/apis/v1/";
       const normalized = base.endsWith("/") ? base : base + "/";
       const res = await fetch(`${normalized}payments/khalti/create`, {
         method: 'POST',

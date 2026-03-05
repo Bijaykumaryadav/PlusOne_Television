@@ -20,8 +20,8 @@ module.exports = {
   SECRET_KEY: process.env.ESEWA_SECRET_KEY || '',
   SUCCESS_URL:
     process.env.ESEWA_SUCCESS_URL ||
-    'http://localhost:8000/apis/v1/payments/esewa/success',
+    'http://72.60.223.137:8000/apis/v1/payments/esewa/success',
   FAILURE_URL:
     process.env.ESEWA_FAILURE_URL ||
-    'http://localhost:8000/apis/v1/payments/esewa/failure',
+    'http://72.60.223.137:8000/apis/v1/payments/esewa/failure',
 };
