@@ -8,7 +8,7 @@ import UsersFooter from "@/components/users-view/users-footer";
 import { ArrowLeft } from "lucide-react";
 
 // khalti public key from env
-const KHALTI_PUBLIC_KEY = import.meta.env.VITE_KHALTI_PUBLIC_KEY;
+const KHALTI_PUBLIC_KEY = import.meta.env.VITE_KHALTI_PUBLIC_KEY || "83890d6e93e645a9a69d291777bf83ce";
 
 export default function PaymentPage() {
   const [amt, setAmt] = useState("");

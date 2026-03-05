@@ -4,7 +4,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import NotFound from "@/pages/not-found";
 import ArticlesList from "@/pages/articles";
 import ArticleDetail from "@/pages/articles/[id]";
-import PaymentPage from "@/pages/payment";
+import PaymentPage from "@/pages/users-view/PaymentPage";
 // import Header from "@/components/home/Header";
 // import Hero from "@/components/home/Hero";
 // import Footer from "@/components/home/Footer";
@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { restoreSession, authSelector } from "./features/admin/auth-slice";
 import UsersDashboard from "./pages/users-view/users-dashboard";
+import PaymentVerifyPage from "./pages/users-view/PaymentVerifyPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -53,8 +54,11 @@ function App() {
         <Route path="/" element={<UsersDashboard />} />
         <Route path="/articles" element={<ArticlesList />} />
         <Route path="/articles/:id" element={<ArticleDetail />} />
+       {/* Khalti payment routes */}
         <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/payment/verify" element={<PaymentVerifyPage />} />
 
+          {/* Admin Authentication Routes */}
         <Route path="/auth/admin" element={<AdminAuthLayout />}>
           <Route path="login" element={<AdminLogin />} />
           <Route path="register" element={<AdminRegister />} />

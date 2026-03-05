@@ -1,10 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/admin/auth-slice";
 import { injectStore } from "../services/axiosInstance";
+import paymentReducer from "../features/users/Paymentslice";
+
 
 export const store = configureStore({
   reducer: {
     adminAuth: authReducer,
+    payment: paymentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

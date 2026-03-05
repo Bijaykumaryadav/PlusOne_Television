@@ -8,6 +8,6 @@ const router = express.Router();
 router.use("/users",userRoute);
 router.use("/admin",adminRoute);
 router.use("/articles", publicArticlesRoute);
-router.use("/payments", paymentsRoute);
+router.use("/payment", paymentsRoute);
 
 module.exports = router; 
