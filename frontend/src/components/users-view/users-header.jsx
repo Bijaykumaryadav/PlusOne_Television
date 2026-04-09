@@ -28,6 +28,10 @@ export default function UsersHeader() {
 
   const categories = ['Home', 'Politics', 'Sports', 'Business', 'Technology', 'Entertainment'];
 
+  const getCategoryLink = (cat) => {
+    return cat === 'Home' ? '/' : `/articles?category=${cat}`;
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
       {/* Breaking News Banner */}
@@ -52,7 +56,7 @@ export default function UsersHeader() {
             {categories.map(cat => (
               <Link
                 key={cat}
-                to={`/articles?category=${cat}`}
+                to={getCategoryLink(cat)}
                 className="text-sm font-medium text-gray-700 hover:text-red-600 relative transition-colors group"
               >
                 {cat}
@@ -174,7 +178,7 @@ export default function UsersHeader() {
                   {categories.map(cat => (
                     <Link
                       key={cat}
-                      to={`/articles?category=${cat}`}
+                      to={getCategoryLink(cat)}
                       className="text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
                     >
                       {cat}

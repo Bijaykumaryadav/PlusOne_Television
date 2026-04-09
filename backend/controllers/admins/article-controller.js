@@ -309,6 +309,148 @@ const getFeaturedArticles = async (req, res) => {
   }
 };
 
+// @desc    Like an article
+// @route   POST /api/articles/:id/like
+// @access  Public
+const likeArticle = async (req, res) => {
+  try {
+    const { userId, userEmail } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+    
+    const article = await Article.findById(req.params.id);
+    
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+    
+    // Check if user already liked this article
+    const existingLike = article.likes.find(like => like.userId === userId);
+    
+    if (existingLike) {
+      return res.status(400).json({
+        success: false,
+        message: "You already liked this article",
+      });
+    }
+    
+    // Add like
+    article.likes.push({
+      userId,
+      userEmail: userEmail || "",
+      likedAt: new Date(),
+    });
+    
+    article.likeCount = article.likes.length;
+    await article.save();
+    
+    res.status(200).json({
+      success: true,
+      message: "Article liked successfully",
+      data: {
+        likeCount: article.likeCount,
+        likes: article.likes,
+      },
+    });
+  } catch (error) {
+    console.error("Error liking article:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error liking article",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Unlike an article
+// @route   DELETE /api/articles/:id/like
+// @access  Public
+const unlikeArticle = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+    
+    const article = await Article.findById(req.params.id);
+    
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+    
+    // Remove like
+    article.likes = article.likes.filter(like => like.userId !== userId);
+    article.likeCount = article.likes.length;
+    await article.save();
+    
+    res.status(200).json({
+      success: true,
+      message: "Like removed successfully",
+      data: {
+        likeCount: article.likeCount,
+        likes: article.likes,
+      },
+    });
+  } catch (error) {
+    console.error("Error unliking article:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error unliking article",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Track share
+// @route   POST /api/articles/:id/share
+// @access  Public
+const trackShare = async (req, res) => {
+  try {
+    const article = await Article.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { shareCount: 1 } },
+      { new: true }
+    );
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Share tracked successfully",
+      data: {
+        shareCount: article.shareCount,
+      },
+    });
+  } catch (error) {
+    console.error("Error tracking share:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error tracking share",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllArticles,
   getArticleById,
@@ -318,4 +460,7 @@ module.exports = {
   searchArticles,
   getFeaturedArticles,
   uploadImage,
+  likeArticle,
+  unlikeArticle,
+  trackShare,
 };

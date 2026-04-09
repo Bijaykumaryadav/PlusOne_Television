@@ -61,7 +61,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Server clears the httpOnly refresh token cookie
-      await publicClient.post("/auth/logout");
+      await publicClient.post("/users/auth/logout");
       try {
         localStorage.removeItem("accessToken");
       } catch (e) {}
@@ -105,7 +105,7 @@ export const restoreSession = createAsyncThunk(
       }
 
       // Fallback: attempt refresh via httpOnly cookie (if backend supports it)
-      const { data } = await publicClient.post("/auth/refresh").catch(() => null);
+      const { data } = await publicClient.post("/users/auth/refresh").catch(() => null);
       if (data && data.accessToken) {
         return {
           user: data.user,

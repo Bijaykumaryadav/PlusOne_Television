@@ -64,6 +64,29 @@ const ArticleSchema = new mongoose.Schema(
       enum: ["draft", "published", "archived"],
       default: "published",
     },
+    likes: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        userEmail: {
+          type: String,
+        },
+        likedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
+    shareCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

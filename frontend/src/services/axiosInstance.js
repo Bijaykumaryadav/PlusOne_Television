@@ -2,7 +2,8 @@ import axios from "axios";
 // import { store } from "../store/store";
 import { setAccessToken, logout } from "../features/admin/auth-slice";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://72.60.223.137:8000/apis/v1/";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/apis/v1/";
+// "http://72.60.223.137:8000/apis/v1/";
 
 let store;
 
@@ -90,7 +91,7 @@ privateClient.interceptors.response.use(
 
       try {
         // Hit refresh endpoint — server reads httpOnly cookie and returns new access token
-        const { data } = await publicClient.post("/auth/refresh");
+        const { data } = await publicClient.post("/users/auth/refresh");
         const newToken = data.accessToken;
 
         store.dispatch(setAccessToken(newToken));

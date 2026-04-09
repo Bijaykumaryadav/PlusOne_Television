@@ -20,7 +20,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || "http://localhost:5173",
+      "http://localhost:5173",
+      "http://localhost:3000",
+      // Add your IP address for development
+      "http://72.60.223.137:5173",
+      "http://72.60.223.137:3000"
+    ];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
   exposedHeaders: ["Content-Disposition", "Content-Type"],

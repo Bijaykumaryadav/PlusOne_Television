@@ -40,9 +40,13 @@ export default function UsersFooter() {
             {/* About Section */}
             <div>
               <h4 className="text-white font-bold text-lg mb-4">About Us</h4>
-              <p className="text-sm leading-relaxed mb-4">
-                Sidha Reporting is a leading news media platform dedicated to bringing you the latest, most accurate news from around the world.
-              </p>
+              <div className="text-sm leading-relaxed mb-4">
+                <p>Company : Sidha Media Group Pvt. Ltd.</p>
+                <p>Address : Birgunj, Parsa, Nepal.</p>
+                <p>Phone :+977 9855013123</p>
+                <p>E-mail : sidhareporting@gmail.com</p>
+                <p>Mass Communication Authority Registration No. : 00102/082-83</p>
+              </div>
               <div className="flex gap-3">
                 {[
                   { Icon: Facebook, label: 'Facebook' },
@@ -58,7 +62,7 @@ export default function UsersFooter() {
                     className="rounded-full bg-white/10 text-white hover:bg-red-600 transition-colors"
                     title={label}
                   >
-                    <a href="#">
+                    <a href="https://www.facebook.com/profile.php?id=61574934751035">
                       <Icon className="w-5 h-5" />
                     </a>
                   </Button>
@@ -109,15 +113,17 @@ export default function UsersFooter() {
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 mt-1 text-red-500 flex-shrink-0" />
-                  <span>binarybytebishal267@gmail.com</span>
+                  <span>
+                  sidhareporting@gmail.com
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-red-500 flex-shrink-0" />
-                  <span>+977 9804211151</span>
+                  <span>+977 9855013123</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 mt-1 text-red-500 flex-shrink-0" />
-                  <span>Birgunj,Parsa,Nepal</span>
+                  <span>Birgunj, Parsa, Nepal</span>
                 </div>
               </div>
             </div>
@@ -127,7 +133,7 @@ export default function UsersFooter() {
 
           {/* Footer Bottom */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 text-sm">
-            <p>&copy; {currentYear} Sidha Reporting. All rights reserved.</p>
+            <p>&copy; {currentYear} Sidha Media Group Pvt. Ltd . All rights reserved.</p>
             <div className="flex gap-4">
               {[
                 { label: 'Privacy Policy', href: '#privacy' },
