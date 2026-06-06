@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./backend
+    container_name: express-server
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - fullstack-network
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    # Optional: Add volume for persistent logs
+    volumes:
+      - ./backend/logs:/usr/src/app/logs
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-client
+    ports:
+      - "5173:3000"
+    networks:
+      - fullstack-network
+    depends_on:
+      - server
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+networks:
+  fullstack-network:
+    driver: bridge

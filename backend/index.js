@@ -23,9 +23,11 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.FRONTEND_URL || "http://localhost:5173",
+      "https://sidhareporting.com",
+      "https://www.sidhareporting.com",
       "http://localhost:5173",
       "http://localhost:3000",
-      // Add your IP address for development
+      // For development only
       "http://72.60.223.137:5173",
       "http://72.60.223.137:3000"
     ];

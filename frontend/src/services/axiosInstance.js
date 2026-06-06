@@ -3,7 +3,6 @@ import axios from "axios";
 import { setAccessToken, logout } from "../features/admin/auth-slice";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/apis/v1/";
-// "http://72.60.223.137:8000/apis/v1/";
 
 let store;
 
