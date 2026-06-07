@@ -1,13 +1,8 @@
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-
-// Pages
 import NotFound from "@/pages/not-found";
 import ArticlesList from "@/pages/articles";
 import ArticleDetail from "@/pages/articles/[id]";
 import PaymentPage from "@/pages/users-view/PaymentPage";
-// import Header from "@/components/home/Header";
-// import Hero from "@/components/home/Hero";
-// import Footer from "@/components/home/Footer";
 import AdminLayout from "@/components/admin-view/admin-layout";
 import AdminDashboard from "@/pages/admin-view/admin-dashboard";
 import ProtectedRoute from "@/utils/protectedRoute";
@@ -16,11 +11,16 @@ import AdminLogin from "@/pages/admin-auth/login";
 import AdminRegister from "@/pages/admin-auth/register";
 import AdminVerifyOtp from "@/pages/admin-auth/verify-otp";
 import AdminArticles from "./pages/admin-view/admin-article";
+import AdminAds from "./pages/admin-view/admin-ads";
+import AdminNotices from "./pages/admin-view/admin-notices";   // ← new
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { restoreSession, authSelector } from "./features/admin/auth-slice";
 import UsersDashboard from "./pages/users-view/users-dashboard";
 import PaymentVerifyPage from "./pages/users-view/PaymentVerifyPage";
+import CareerPage from "./pages/users-view/CareerPage";        // ← new
+import AboutPage from "./pages/users-view/AboutPage";          // ← new
+import NoticePage from "./pages/users-view/NoticePage";        // ← new
 
 function App() {
   const dispatch = useDispatch();
@@ -31,8 +31,7 @@ function App() {
   useEffect(() => {
     dispatch(restoreSession());
   }, [dispatch]);
-  // If the session has finished restoring and the user is not authenticated,
-  // redirect them to the admin login page only when they're on an admin route.
+
   useEffect(() => {
     if (!isSessionRestoring && !isAuthenticated && location.pathname.startsWith("/admin")) {
       navigate("/auth/admin/login", { replace: true });
@@ -50,15 +49,17 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <Routes>
-        {/* Home Route */}
+        {/* User Routes */}
         <Route path="/" element={<UsersDashboard />} />
         <Route path="/articles" element={<ArticlesList />} />
         <Route path="/articles/:id" element={<ArticleDetail />} />
-       {/* Khalti payment routes */}
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/payment/verify" element={<PaymentVerifyPage />} />
+        <Route path="/careers" element={<CareerPage />} />       {/* ← new */}
+        <Route path="/about" element={<AboutPage />} />          {/* ← new */}
+        <Route path="/notices" element={<NoticePage />} />       {/* ← new */}
 
-          {/* Admin Authentication Routes */}
+        {/* Admin Auth Routes */}
         <Route path="/auth/admin" element={<AdminAuthLayout />}>
           <Route path="login" element={<AdminLogin />} />
           <Route path="register" element={<AdminRegister />} />
@@ -69,11 +70,12 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="articles" element={<AdminArticles/>} />
+            <Route path="articles" element={<AdminArticles />} />
+            <Route path="ads" element={<AdminAds />} />
+            <Route path="notices" element={<AdminNotices />} />  {/* ← new */}
           </Route>
         </Route>
 
-        {/* Fallback Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

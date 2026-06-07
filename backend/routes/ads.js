@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const passport = require('passport');
 const {
   getAllAds,
   getAdsByPosition,
@@ -22,10 +23,30 @@ router.get('/position/:position', getAdsByPosition);
 router.put('/:id/click', recordAdClick);
 router.put('/:id/view', recordAdView);
 
-// Admin routes (will add auth middleware later)
-router.post('/', createAd);
-router.put('/:id', updateAd);
-router.delete('/:id', deleteAd);
-router.post('/upload', upload.single('image'), uploadImage);
+// Protected Admin routes
+router.post(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  createAd
+);
+
+router.put(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  updateAd
+);
+
+router.delete(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  deleteAd
+);
+
+router.post(
+  '/upload',
+  passport.authenticate('jwt', { session: false }),
+  upload.single('image'),
+  uploadImage
+);
 
 module.exports = router;

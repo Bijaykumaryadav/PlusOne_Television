@@ -6,6 +6,7 @@ import {
   BarChart3,
   Video,
   Megaphone,
+  Image,
 } from "lucide-react";
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,12 @@ const adminSidebarMenuItems = [
     label: "Articles",
     path: "/admin/articles",
     icon: <FileText />,
+  },
+  {
+    id: "ads",
+    label: "Advertisements",
+    path: "/admin/ads",
+    icon: <Image />,
   },
   {
     id: "breaking-news",
@@ -78,7 +85,7 @@ function MenuItems({ setOpen }) {
   const navigate = useNavigate();
   
   return (
-    <nav className="mt-8 flex-col flex gap-2">
+    <nav className="mt-8 flex-col flex gap-2 ml-4">
       {adminSidebarMenuItems.map((menuItem) => (
         <div
           key={menuItem.id}
@@ -102,9 +109,9 @@ function AdminSidebar({ open, setOpen }) {
   return (
     <Fragment>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-64">
+        <SheetContent side="left" className="w-64 pl-8">
           <div className="flex flex-col h-full">
-            <SheetHeader className="border-b">
+            <SheetHeader className="border-b ml-4">
               <SheetTitle className="flex gap-2 mt-5 mb-5">
                 <Newspaper size={30} />
                 <h1 className="text-2xl font-extrabold">News Admin</h1>

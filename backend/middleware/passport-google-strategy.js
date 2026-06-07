@@ -24,7 +24,7 @@ passport.use(
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
       callbackURL:
-        "http://72.60.223.137:8000/apis/v1/users/auth/google/callback",
+        "https://www.sidhareporting.com/apis/v1/users/auth/google/callback",
     },
     async function (accessToken, refreshToken, profile, done) {
       console.log(profile);
