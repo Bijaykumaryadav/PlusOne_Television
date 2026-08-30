@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, Eye, Linkedin } from 'lucide-react';
 import { shareOnSocialMedia, copyToClipboard } from '@/utils/shareUtils';
-import { setupHomepageSEO } from '@/utils/seoUtils';
+import { setupHomepageSEO, buildArticleUrl } from '@/utils/seoUtils';
 import { fetchAllArticles, fetchFeaturedArticles, fetchCategoizedArticles, setCurrentCategory } from '@/features/articles/articlesSlice';
 
 const CATEGORIES = [
@@ -85,9 +85,17 @@ export default function UsersDashboard() {
 
   const fetchAds = async () => {
     try {
-      const response = await publicClient.get('/ads/position/sidebar');
-      if (response.data && response.data.data) {
-        setAds(response.data.data);
+      const [sidebarResponse, topResponse] = await Promise.all([
+        publicClient.get('/ads/position/sidebar'),
+        publicClient.get('/ads/position/top'),
+      ]);
+
+      const sidebarAds = sidebarResponse?.data?.data || [];
+      const topAds = topResponse?.data?.data || [];
+
+      setAds(sidebarAds.length ? sidebarAds : []);
+      if (sidebarAds.length === 0 && topAds.length > 0) {
+        setAds(topAds);
       }
     } catch (error) {
       console.error('Error fetching ads:', error);
@@ -142,14 +150,14 @@ export default function UsersDashboard() {
 
   const handleCopyLink = (e, article) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/articles/${article._id}`;
+    const url = `${window.location.origin}${buildArticleUrl(article)}`;
     copyToClipboard(url);
     alert('Link copied to clipboard!');
     setShareOpen(null);
   };
 
-  const handleCardClick = (articleId) => {
-    navigate(`/articles/${articleId}`);
+  const handleCardClick = (article) => {
+    navigate(buildArticleUrl(article));
   };
 
   const getArticleStats = (article) => ({
@@ -196,7 +204,7 @@ export default function UsersDashboard() {
                 <div
                   key={article._id}
                   className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group rounded-lg border border-gray-200 bg-white"
-                  onClick={() => handleCardClick(article._id)}
+                  onClick={() => handleCardClick(article)}
                 >
                   <div className="relative overflow-hidden h-40">
                     <img
@@ -266,7 +274,7 @@ export default function UsersDashboard() {
                   <div key={article._id}>
                     <div
                       className="grid grid-cols-4 gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
-                      onClick={() => handleCardClick(article._id)}
+                      onClick={() => handleCardClick(article)}
                     >
                       <div className="col-span-1 overflow-hidden rounded h-24">
                         <img
@@ -380,28 +388,34 @@ export default function UsersDashboard() {
       )}
 
       {ads.length > 0 ? (
-        <Card
-          className="overflow-hidden border-0 cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={async () => {
-            try {
-              await publicClient.put(`/ads/${ads[0]._id}/click`);
-              window.open(ads[0].linkUrl, '_blank');
-            } catch (error) {
-              console.error('Error tracking ad click:', error);
-            }
-          }}
-        >
-          <div className="relative overflow-hidden h-80 bg-gray-200">
-            {ads[0].imageUrl && (
-              <img src={ads[0].imageUrl} alt={ads[0].title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-            )}
-            {ads[0].bannerText && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
-                <p className="font-semibold text-sm">{ads[0].bannerText}</p>
+        <div className="space-y-4">
+          {ads.map((ad, index) => (
+            <Card
+              key={ad._id || `${ad.title}-${index}`}
+              className="overflow-hidden border-0 cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={async () => {
+                try {
+                  await publicClient.put(`/ads/${ad._id}/click`);
+                  window.open(ad.linkUrl, '_blank', 'noopener,noreferrer');
+                } catch (error) {
+                  console.error('Error tracking ad click:', error);
+                }
+              }}
+            >
+              <div className="relative overflow-hidden bg-gray-200">
+                {ad.imageUrl && (
+                  <img src={ad.imageUrl} alt={ad.title} className="w-full h-52 object-cover hover:scale-105 transition-transform duration-300" />
+                )}
+                <div className="bg-white p-4">
+                  <div className="text-[10px] uppercase tracking-wide text-red-600 font-bold mb-1">Sponsored</div>
+                  <h4 className="font-bold text-gray-900 text-sm mb-1">{ad.title}</h4>
+                  {ad.description && <p className="text-xs text-gray-600 line-clamp-3">{ad.description}</p>}
+                  {ad.bannerText && <p className="mt-2 text-xs font-medium text-red-600">{ad.bannerText}</p>}
+                </div>
               </div>
-            )}
-          </div>
-        </Card>
+            </Card>
+          ))}
+        </div>
       ) : (
         <Card className="bg-gradient-to-br from-gray-200 to-gray-300 border-0 min-h-80 flex items-center justify-center">
           <CardContent className="text-center">

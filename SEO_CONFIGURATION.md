@@ -52,11 +52,11 @@ Update in article detail pages with:
 
 ### Implemented URLs:
 ```
-Homepage: https://sdhareporting.com/
-Articles: https://sdhareporting.com/articles
-Article Detail: https://sdhareporting.com/articles/:articleId
-Categories: https://sdhareporting.com/articles?category=politics
-Payment: https://sdhareporting.com/payment
+Homepage: https://sidhareporting.com/
+Articles: https://sidhareporting.com/articles
+Article Detail: https://sidhareporting.com/articles/:articleId
+Categories: https://sidhareporting.com/articles?category=politics
+Payment: https://sidhareporting.com/payment
 ```
 
 ### Best Practices:
@@ -101,7 +101,7 @@ Add to homepage:
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Sidha Reporting",
-  "url": "https://sdhareporting.com",
+  "url": "https://sidhareporting.com",
   "logo": "Logo URL",
   "sameAs": [
     "https://facebook.com/sidha-reporting",

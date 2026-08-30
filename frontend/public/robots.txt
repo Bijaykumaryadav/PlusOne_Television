@@ -11,7 +11,7 @@ Disallow: /auth
 Disallow: /api
 
 # Specify sitemap location
-Sitemap: https://sdhareporting.com/sitemap.xml
+Sitemap: https://sidhareporting.com/sitemap.xml
 
 # Crawl delay to reduce server load (in seconds)
 Crawl-delay: 1

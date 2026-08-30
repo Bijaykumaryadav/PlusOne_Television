@@ -7,6 +7,7 @@ import {
   Video,
   Megaphone,
   Image,
+  PenSquare,
 } from "lucide-react";
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,12 @@ const adminSidebarMenuItems = [
     label: "Advertisements",
     path: "/admin/ads",
     icon: <Image />,
+  },
+  {
+    id: "content-pages",
+    label: "Content Pages",
+    path: "/admin/content-pages",
+    icon: <PenSquare />,
   },
   {
     id: "breaking-news",

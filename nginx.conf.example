@@ -12,6 +12,11 @@ server {
 
     # Frontend - React Application
     location / {
+        if ($http_user_agent ~* "(facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|slackbot|googlebot|bingbot|duckduckbot|baiduspider|yandex|facebot|embedly|crawler|spider)") {
+            proxy_pass http://localhost:8000;
+            break;
+        }
+
         proxy_pass http://localhost:5173;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;

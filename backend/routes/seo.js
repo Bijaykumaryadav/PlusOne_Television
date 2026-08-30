@@ -12,13 +12,13 @@ router.get('/sitemap.xml', async (req, res) => {
   try {
     res.header('Content-Type', 'application/xml');
 
-    const baseUrl = process.env.FRONTEND_URL || 'https://sdhareporting.com';
+    const baseUrl = process.env.FRONTEND_URL || 'https://sidhareporting.com';
 
     // Get all published articles
     const articles = await Article.find({
       status: 'published'
     })
-      .select('_id publishedDate updatedDate')
+      .select('_id slug publishedDate updatedDate title')
       .sort({ publishedDate: -1 })
       .lean();
 
@@ -57,8 +57,17 @@ router.get('/sitemap.xml', async (req, res) => {
       const lastMod = (article.updatedDate || article.publishedDate)
         .toISOString()
         .split('T')[0];
+      const slug = article.slug || article.title?.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\u0900-\u097f\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || article._id.toString();
+
       xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/articles/${article._id}</loc>\n`;
+      xml += `    <loc>${baseUrl}/articles/${slug}</loc>\n`;
       xml += `    <lastmod>${lastMod}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.7</priority>\n';

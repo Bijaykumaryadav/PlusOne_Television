@@ -8,6 +8,7 @@ import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, Linkedin } from 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { shareOnSocialMedia, copyToClipboard } from '@/utils/shareUtils';
+import { buildArticleUrl } from '@/utils/seoUtils';
 import { fetchAllArticles } from '@/features/articles/articlesSlice';
 
 const ArticlesList = () => {
@@ -105,14 +106,14 @@ const ArticlesList = () => {
 
   const handleCopyLink = (e, article) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/articles/${article._id}`;
+    const url = `${window.location.origin}${buildArticleUrl(article)}`;
     copyToClipboard(url);
     alert('Link copied to clipboard!');
     setShareOpen(null);
   };
 
-  const handleCardClick = (articleId) => {
-    navigate(`/articles/${articleId}`);
+  const handleCardClick = (article) => {
+    navigate(buildArticleUrl(article));
   };
 
   return (
@@ -184,7 +185,7 @@ const ArticlesList = () => {
               {filteredArticles.map((article) => (
                 <div
                   key={article._id}
-                  onClick={() => handleCardClick(article._id)}
+                  onClick={() => handleCardClick(article)}
                   className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition transform hover:scale-105 cursor-pointer relative"
                 >
                   {/* Image Container */}

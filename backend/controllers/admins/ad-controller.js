@@ -2,6 +2,17 @@ const Ad = require("../../models/Ad");
 const cloudinary = require("../../config/cloudinary");
 const streamifier = require('streamifier');
 
+const normalizeAdPosition = (position) => {
+  const value = (position || '').toString().trim().toLowerCase();
+
+  if (!value) return 'sidebar';
+  if (['header', 'top'].includes(value)) return 'top';
+  if (['text', 'ticker', 'marquee', 'breaking'].includes(value)) return 'text';
+  if (['sidebar', 'bottom'].includes(value)) return value;
+
+  return value;
+};
+
 // @desc    Get all active ads
 // @route   GET /api/ads
 // @access  Public
@@ -32,11 +43,13 @@ const getAllAds = async (req, res) => {
 const getAdsByPosition = async (req, res) => {
   try {
     const { position } = req.params;
+    const queryPosition = normalizeAdPosition(position);
+
     const ads = await Ad.find({
       isActive: true,
-      position,
+      position: queryPosition,
       endDate: { $gte: new Date() }
-    }).sort({ priority: 1 });
+    }).sort({ priority: 1, createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -69,21 +82,23 @@ const createAd = async (req, res) => {
       priority,
     } = req.body;
 
-    // Validation
-    if (!title || !imageUrl || !linkUrl) {
+    const normalizedPosition = normalizeAdPosition(position);
+
+    // Allow text-only ads and optional media fields.
+    if (!title || !title.toString().trim()) {
       return res.status(400).json({
         success: false,
-        message: "Please provide required fields: title, imageUrl, linkUrl",
+        message: "Please provide an ad title.",
       });
     }
 
     const ad = await Ad.create({
-      title,
+      title: title.trim(),
       description,
-      imageUrl,
-      linkUrl,
+      imageUrl: imageUrl || '',
+      linkUrl: linkUrl || '',
       bannerText,
-      position: position || "sidebar",
+      position: normalizedPosition,
       isActive: isActive !== false,
       endDate,
       priority: priority || 1,
@@ -119,12 +134,21 @@ const updateAd = async (req, res) => {
     }
 
     // Update fields
+    const nextPosition = normalizeAdPosition(req.body.position || ad.position);
+
+    if (!req.body.title || !req.body.title.toString().trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide an ad title.",
+      });
+    }
+
     ad.title = req.body.title || ad.title;
     ad.description = req.body.description || ad.description;
-    ad.imageUrl = req.body.imageUrl || ad.imageUrl;
+    ad.imageUrl = req.body.imageUrl !== undefined ? req.body.imageUrl : ad.imageUrl;
     ad.linkUrl = req.body.linkUrl || ad.linkUrl;
     ad.bannerText = req.body.bannerText || ad.bannerText;
-    ad.position = req.body.position || ad.position;
+    ad.position = nextPosition;
     ad.isActive = req.body.isActive !== undefined ? req.body.isActive : ad.isActive;
     ad.endDate = req.body.endDate || ad.endDate;
     ad.priority = req.body.priority !== undefined ? req.body.priority : ad.priority;

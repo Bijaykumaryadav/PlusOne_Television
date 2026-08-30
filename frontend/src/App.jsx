@@ -13,6 +13,7 @@ import AdminVerifyOtp from "@/pages/admin-auth/verify-otp";
 import AdminArticles from "./pages/admin-view/admin-article";
 import AdminAds from "./pages/admin-view/admin-ads";
 import AdminNotices from "./pages/admin-view/admin-notices";   // ← new
+import AdminContentPages from "./pages/admin-view/admin-content-pages";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { restoreSession, authSelector } from "./features/admin/auth-slice";
@@ -52,7 +53,7 @@ function App() {
         {/* User Routes */}
         <Route path="/" element={<UsersDashboard />} />
         <Route path="/articles" element={<ArticlesList />} />
-        <Route path="/articles/:id" element={<ArticleDetail />} />
+        <Route path="/articles/:slug" element={<ArticleDetail />} />
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/payment/verify" element={<PaymentVerifyPage />} />
         <Route path="/careers" element={<CareerPage />} />       {/* ← new */}
@@ -72,6 +73,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="ads" element={<AdminAds />} />
+            <Route path="content-pages" element={<AdminContentPages />} />
             <Route path="notices" element={<AdminNotices />} />  {/* ← new */}
           </Route>
         </Route>

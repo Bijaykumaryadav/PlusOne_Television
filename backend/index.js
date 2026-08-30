@@ -6,6 +6,7 @@ const session = require("express-session");
 require("./middleware/passport-google-strategy");
 require("./middleware/passport-jwt-strategy");
 const cors = require("cors");
+const Article = require("./models/article");
 const path = require("path");
 // index.js – relevant excerpt
 let port;
@@ -14,6 +15,53 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   port = process.env.PORT || 8000;
 }
+
+const escapeHtml = (value = "") => String(value)
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/\"/g, "&quot;")
+  .replace(/'/g, "&#039;");
+
+const isCrawlerRequest = (req) => {
+  const userAgent = (req.get("user-agent") || "").toLowerCase();
+  return /(facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|slackbot|googlebot|bingbot|duckduckbot|baiduspider|yandex|facebot|embedly|crawler|spider)/i.test(userAgent);
+};
+
+const buildSocialMetaPage = (article) => {
+  const title = article.title || "Sidha Reporting";
+  const description = article.summary || "Read the latest update from Sidha Reporting.";
+  const image = article.image
+    ? (/^https?:\/\//i.test(article.image) ? article.image : `https://sidhareporting.com${article.image.startsWith("/") ? article.image : `/${article.image}`}`)
+    : "https://sidhareporting.com/logofinal.png";
+  const url = `https://sidhareporting.com/articles/${article.slug || article.slugEn || encodeURIComponent(title)}`;
+
+  return `<!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>${escapeHtml(title)} | Sidha Reporting</title>
+      <meta name="description" content="${escapeHtml(description)}" />
+      <meta name="robots" content="index, follow" />
+      <meta property="og:title" content="${escapeHtml(title)}" />
+      <meta property="og:description" content="${escapeHtml(description)}" />
+      <meta property="og:type" content="article" />
+      <meta property="og:url" content="${escapeHtml(url)}" />
+      <meta property="og:image" content="${escapeHtml(image)}" />
+      <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
+      <meta property="og:image:alt" content="${escapeHtml(title)}" />
+      <meta property="og:site_name" content="Sidha Reporting" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="${escapeHtml(title)}" />
+      <meta name="twitter:description" content="${escapeHtml(description)}" />
+      <meta name="twitter:image" content="${escapeHtml(image)}" />
+      <meta name="twitter:image:alt" content="${escapeHtml(title)}" />
+      <link rel="canonical" href="${escapeHtml(url)}" />
+    </head>
+    <body></body>
+  </html>`;
+};
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -64,6 +112,34 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 dbConnection(); 
+
+app.get("/articles/:slug", async (req, res) => {
+  try {
+    if (!isCrawlerRequest(req)) {
+      return res.status(404).send("Not found");
+    }
+
+    const slug = decodeURIComponent(req.params.slug || "");
+    const article = await Article.findOne({
+      $or: [
+        { slug: slug },
+        { slugEn: slug },
+        { title: slug },
+      ],
+      status: "published",
+    }).lean();
+
+    if (!article) {
+      return res.status(404).send("Article not found");
+    }
+
+    res.type("html");
+    res.send(buildSocialMetaPage(article));
+  } catch (error) {
+    console.error("Social metadata route error:", error);
+    res.status(500).send("Error generating social metadata");
+  }
+});
 
 app.use("/apis/v1", require("./routes"));
 

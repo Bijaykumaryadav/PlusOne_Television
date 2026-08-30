@@ -1,3 +1,5 @@
+import { buildArticleUrl } from '@/utils/seoUtils';
+
 // Share utilities for social media sharing with dynamic article metadata
 
 // Update article share count and metadata
@@ -17,30 +19,39 @@ export const setArticleMetaTags = (article) => {
   if (!article) return;
 
   const { title, summary, image, _id, category, author } = article;
-  const url = `${window.location.origin}/articles/${_id}`;
+  const ogImage = image
+    ? (image.startsWith('http://') || image.startsWith('https://') ? image : `https://sidhareporting.com${image}`)
+    : 'https://sidhareporting.com/logofinal.png';
+  const url = `${window.location.origin}${buildArticleUrl(article)}`;
 
   // Update Open Graph meta tags
   updateMetaTag('og:title', title);
-  updateMetaTag('og:description', summary);
-  updateMetaTag('og:image', image);
+  updateMetaTag('og:description', summary || title);
+  updateMetaTag('og:image', ogImage);
+  updateMetaTag('og:image:secure_url', ogImage);
+  updateMetaTag('og:image:alt', title);
   updateMetaTag('og:url', url);
   updateMetaTag('og:type', 'article');
+  updateMetaTag('og:site_name', 'Sidha Reporting');
 
   // Update Twitter Card meta tags
   updateMetaTag('twitter:title', title);
-  updateMetaTag('twitter:description', summary);
-  updateMetaTag('twitter:image', image);
+  updateMetaTag('twitter:description', summary || title);
+  updateMetaTag('twitter:image', ogImage);
+  updateMetaTag('twitter:image:alt', title);
   updateMetaTag('twitter:card', 'summary_large_image');
 
   // Update article-specific meta tags
-  updateMetaTag('article:published_time', new Date(article.publishedDate).toISOString());
+  if (article.publishedDate) {
+    updateMetaTag('article:published_time', new Date(article.publishedDate).toISOString());
+  }
   updateMetaTag('article:author', author);
   updateMetaTag('article:section', category);
   
   // Update page title and description
   document.title = `${title} | Sidha Reporting`;
-  updateMetaTag('description', summary);
-  updateMetaTag('keywords', `${category}, ${author}, news, ${title}`);
+  updateMetaTag('description', summary || title);
+  updateMetaTag('keywords', `${category || 'news'}, ${author || 'Sidha Reporting'}, ${title}`);
 };
 
 // Helper to update or create meta tags
@@ -60,7 +71,7 @@ const updateMetaTag = (name, content) => {
 
 export const shareOnSocialMedia = async (platform, article, client) => {
   const { title, summary, image, _id } = article;
-  const shareUrl = `${window.location.origin}/articles/${_id}`;
+  const shareUrl = `${window.location.origin}${buildArticleUrl(article)}`;
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
   const encodedSummary = encodeURIComponent(summary || title);

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, Bell, User, LogOut, ChevronDown } from 'lucide-react';
+import { buildArticleUrl } from '@/utils/seoUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import logo from '@/assets/logofinal.png';
+import { publicClient } from '@/services/axiosInstance';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +46,9 @@ export default function UsersHeader() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [previewArticle, setPreviewArticle] = useState(null);
   const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
+  const [currentTopAdIndex, setCurrentTopAdIndex] = useState(0);
+  const [headerAds, setHeaderAds] = useState([]);
+  const [textAds, setTextAds] = useState([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
   const navigate = useNavigate();
@@ -53,6 +58,8 @@ export default function UsersHeader() {
   const { featuredArticles, allArticles } = useSelector(state => state.articles || {});
 
   const tickerArticles = (featuredArticles?.length ? featuredArticles : allArticles || []).slice(0, 20);
+  const marqueeTickerItems = tickerArticles.length ? [...tickerArticles, ...tickerArticles] : [];
+  const marqueeTextAds = textAds.length ? [...textAds, ...textAds] : [];
 
   useEffect(() => {
     if (tickerArticles.length === 0) return;
@@ -61,6 +68,32 @@ export default function UsersHeader() {
     }, 3000);
     return () => clearInterval(interval);
   }, [tickerArticles.length]);
+
+  useEffect(() => {
+    const fetchHeaderAds = async () => {
+      try {
+        const [topResponse, textResponse] = await Promise.all([
+          publicClient.get('/ads/position/top'),
+          publicClient.get('/ads/position/text'),
+        ]);
+
+        setHeaderAds((topResponse?.data?.data || []).filter(ad => ad?.isActive));
+        setTextAds((textResponse?.data?.data || []).filter(ad => ad?.isActive));
+      } catch (error) {
+        console.error('Error fetching ads:', error);
+      }
+    };
+
+    fetchHeaderAds();
+  }, []);
+
+  useEffect(() => {
+    if (!headerAds.length) return;
+    const interval = setInterval(() => {
+      setCurrentTopAdIndex(prev => (prev + 1) % headerAds.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [headerAds.length]);
 
   // Close "More" dropdown on outside click
   useEffect(() => {
@@ -80,9 +113,9 @@ export default function UsersHeader() {
 
   const handleTickerClick = (article) => setPreviewArticle(article);
 
-  const handlePreviewNavigate = (articleId) => {
+  const handlePreviewNavigate = (articleItem = previewArticle) => {
     setPreviewArticle(null);
-    navigate(`/articles/${articleId}`);
+    navigate(buildArticleUrl(articleItem || { _id: '', title: '' }));
   };
 
   const getIsActive = (path) => {
@@ -98,6 +131,7 @@ export default function UsersHeader() {
   };
 
   const isMoreActive = MORE_NAV.some(item => getIsActive(item.path));
+  const currentTopAd = headerAds[currentTopAdIndex] || null;
 
   return (
     <>
@@ -107,42 +141,74 @@ export default function UsersHeader() {
           <Badge variant="secondary" className="bg-white/20 text-white border-0 animate-pulse whitespace-nowrap flex-shrink-0 text-xs">
             🔴 BREAKING
           </Badge>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {tickerArticles.slice(0, 10).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentTickerIndex(i)}
-                className={`rounded-full transition-all duration-300 ${
-                  i === currentTickerIndex % Math.min(tickerArticles.length, 10)
-                    ? 'bg-white w-2 h-2'
-                    : 'bg-white/40 w-1.5 h-1.5'
-                }`}
-              />
-            ))}
+
+          <div className="flex-1 overflow-hidden relative h-6">
+            <div className="marquee-track flex items-center gap-8 whitespace-nowrap h-full">
+              {marqueeTickerItems.map((article, index) => (
+                <button
+                  key={`${article._id}-${index}`}
+                  onClick={() => handleTickerClick(article)}
+                  className="text-left text-sm font-semibold hover:text-yellow-200 transition-colors whitespace-nowrap flex items-center gap-2"
+                >
+                  <span className="text-xs text-white/80">●</span>
+                  <span>{article.title}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex-1 overflow-hidden relative h-5">
-            {tickerArticles.map((article, i) => (
-              <button
-                key={article._id}
-                onClick={() => handleTickerClick(article)}
-                className={`absolute inset-0 text-left text-sm font-semibold truncate w-full transition-all duration-500 hover:text-yellow-200 ${
-                  i === currentTickerIndex
-                    ? 'opacity-100 translate-y-0'
-                    : i === (currentTickerIndex - 1 + tickerArticles.length) % tickerArticles.length
-                    ? 'opacity-0 -translate-y-full'
-                    : 'opacity-0 translate-y-full'
-                }`}
-              >
-                {i + 1}. {article.title}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1 flex-shrink-0 items-center">
-            <button onClick={() => setCurrentTickerIndex(prev => (prev - 1 + tickerArticles.length) % tickerArticles.length)} className="text-white/70 hover:text-white text-lg px-1 transition-colors">‹</button>
-            <span className="text-white/50 text-xs">{tickerArticles.length > 0 ? `${currentTickerIndex + 1}/${tickerArticles.length}` : ''}</span>
-            <button onClick={() => setCurrentTickerIndex(prev => (prev + 1) % tickerArticles.length)} className="text-white/70 hover:text-white text-lg px-1 transition-colors">›</button>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="hidden lg:block max-w-[260px] min-w-[220px] rounded-md bg-white/10 border border-white/20 px-2 py-1 text-left overflow-hidden">
+              {currentTopAd ? (
+                <button
+                  type="button"
+                  onClick={() => window.open(currentTopAd.linkUrl, '_blank', 'noopener,noreferrer')}
+                  className="flex items-center gap-2 w-full text-left hover:text-yellow-200 transition-colors"
+                >
+                  {currentTopAd.imageUrl ? (
+                    <img src={currentTopAd.imageUrl} alt={currentTopAd.title} className="w-8 h-8 rounded object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded bg-yellow-300/30 flex items-center justify-center text-[10px] text-white font-bold">Ad</div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] uppercase tracking-wide text-white/70">Sponsored</div>
+                    <div className="text-xs font-semibold truncate">{currentTopAd.title}</div>
+                  </div>
+                </button>
+              ) : (
+                <div className="text-[10px] uppercase tracking-wide text-white/70">Top Ad</div>
+              )}
+            </div>
           </div>
         </div>
+
+        {textAds.length > 0 && (
+          <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-100 border-b border-yellow-200 px-4 py-2">
+            <div className="max-w-7xl mx-auto overflow-hidden">
+              <div className="flex items-center gap-3">
+                <span className="whitespace-nowrap rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm">
+                  AD
+                </span>
+                <div className="flex-1 overflow-hidden relative h-8">
+                  <div className="marquee-ad-track flex items-center gap-8 whitespace-nowrap h-full text-[13px] font-semibold text-slate-800">
+                    {marqueeTextAds.map((ad, index) => (
+                      <button
+                        key={`${ad._id || ad.title}-${index}`}
+                        type="button"
+                        onClick={() => window.open(ad.linkUrl, '_blank', 'noopener,noreferrer')}
+                        className="whitespace-nowrap rounded-full border border-yellow-300 bg-white/80 px-3 py-1 shadow-sm hover:bg-yellow-100 transition-colors"
+                      >
+                        <span className="font-black text-red-600">{ad.title}</span>
+                        {ad.description ? <span className="mx-2 text-slate-500">•</span> : null}
+                        <span>{ad.description || ad.bannerText || 'Sponsored'}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Header */}
         <div className="border-b border-gray-200">
@@ -223,7 +289,7 @@ export default function UsersHeader() {
                 </Button>
               )}
 
-              <Button asChild className="hidden sm:flex bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold gap-2">
+              <Button asChild className="ml-2 hidden sm:flex bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold gap-2">
                 <Link to="/payment" state={{ source: 'header', referrer: isAuthenticated ? 'premium' : 'advertiser' }}>
                   <span>⭐</span>
                   <span className="hidden lg:inline">{isAuthenticated ? 'Upgrade Premium' : 'Advertise'}</span>
@@ -247,7 +313,7 @@ export default function UsersHeader() {
                       <Link to="/preferences" className="cursor-pointer"><span className="mr-2">⚙️</span> Preferences</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/payment" className="cursor-pointer"><span className="mr-2">⭐</span> Upgrade Premium</Link>
+                      <Link to="/payment" className="cursor-pointer"><span className="ml-2 mr-2">⭐</span> Upgrade Premium</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
@@ -256,7 +322,7 @@ export default function UsersHeader() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild className="sm:hidden bg-red-600 hover:bg-red-700">
+                <Button asChild className="sm:hidden bg-red-600 hover:bg-red-700 ml-2">
                   <Link to="/payment">Premium</Link>
                 </Button>
               )}
@@ -322,7 +388,7 @@ export default function UsersHeader() {
                 <span className="flex items-center gap-1"><Share2 className="h-3 w-3 text-blue-500" /> {previewArticle.shareCount || 0}</span>
                 <span className="ml-auto">{new Date(previewArticle.publishedDate || previewArticle.createdAt).toLocaleDateString()}</span>
               </div>
-              <button onClick={() => handlePreviewNavigate(previewArticle._id)} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
+              <button onClick={() => handlePreviewNavigate(previewArticle)} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm">
                 Read Full Article →
               </button>
             </div>

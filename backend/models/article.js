@@ -1,5 +1,33 @@
 const mongoose = require("mongoose");
 
+const createSeoSlug = (title = "") => {
+  if (!title) return "article";
+
+  return String(title)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "article";
+};
+
+const createEnglishSeoSlug = (title = "") => {
+  if (!title) return "article";
+
+  return String(title)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "article";
+};
+
 const ArticleSchema = new mongoose.Schema(
   {
     image: {
@@ -9,6 +37,30 @@ const ArticleSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
+    },
+    routeTitleNe: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    routeTitleEn: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    slugEn: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
       trim: true,
     },
     summary: {
@@ -92,6 +144,19 @@ const ArticleSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+ArticleSchema.pre("validate", async function () {
+  const nepaliRouteTitle = (this.routeTitleNe || this.title || "").trim();
+  const englishRouteTitle = (this.routeTitleEn || "").trim();
+
+  if (this.isModified("title") || this.isModified("routeTitleNe") || !this.slug) {
+    this.slug = createSeoSlug(nepaliRouteTitle || this.title || "");
+  }
+
+  if (this.isModified("title") || this.isModified("routeTitleEn") || !this.slugEn) {
+    this.slugEn = englishRouteTitle ? createEnglishSeoSlug(englishRouteTitle) : (this.slug || createSeoSlug(this.title || ""));
+  }
+});
 
 // Index for faster queries
 ArticleSchema.index({ category: 1, publishedDate: -1 });

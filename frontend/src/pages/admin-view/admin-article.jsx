@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { toast } from "sonner";
 import privateClient, { publicClient } from '@/services/axiosInstance';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -64,6 +65,8 @@ function AdminProductsTile({ product, setFormData, setOpenCreateProductsDialog, 
             setFormData({
               image: product.image || null,
               title: product.title || "",
+              routeTitleNe: product.routeTitleNe || "",
+              routeTitleEn: product.routeTitleEn || "",
               summary: product.summary || "",
               content: product.content || "",
               category: product.category || "",
@@ -96,6 +99,20 @@ const articleFormElements = [
     componentType: "input",
     type: "text",
     placeholder: "Enter article headline",
+  },
+  {
+    label: "SEO Route Title (Nepali)",
+    name: "routeTitleNe",
+    componentType: "input",
+    type: "text",
+    placeholder: "Optional Nepali route keyword. If blank, article title is used.",
+  },
+  {
+    label: "SEO Route Title (English)",
+    name: "routeTitleEn",
+    componentType: "input",
+    type: "text",
+    placeholder: "Optional English route keyword. If blank, article title is used.",
   },
   {
     label: "Summary",
@@ -153,6 +170,8 @@ function AdminArticles() {
   const initialFormData = {
     image: null,
     title: "",
+    routeTitleNe: "",
+    routeTitleEn: "",
     summary: "",
     content: "",
     category: "",
@@ -235,8 +254,10 @@ function AdminArticles() {
       setUploadedImageUrl("");
       setCurrentEditedId(null);
       fetchArticles();
+      toast.success(currentEditedId !== null ? "Article updated successfully" : "Article published successfully");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to save article");
     }
   }
 
@@ -245,8 +266,10 @@ function AdminArticles() {
       try {
         await privateClient.delete(`/admin/articles/${getCurrentArticleId}`);
         fetchArticles();
+        toast.success("Article deleted successfully");
       } catch (err) {
         console.error(err);
+        toast.error("Failed to delete article");
       }
     })();
   }
@@ -292,7 +315,7 @@ function AdminArticles() {
           setImageFile(null);
         }}
       >
-        <SheetContent side="right" className="overflow-auto">
+        <SheetContent side="right" className="overflow-auto px-6 sm:max-w-2xl w-[92vw]">
           <SheetHeader>
             <SheetTitle>
               {currentEditedId !== null ? "Edit Article" : "Write New Article"}

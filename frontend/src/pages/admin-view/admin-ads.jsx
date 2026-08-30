@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { toast } from "sonner";
 import privateClient from '@/services/axiosInstance';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -11,11 +12,17 @@ function AdminAdTile({ ad, setFormData, setOpenCreateAdDialog, setCurrentEditedI
   return (
     <Card className="w-full max-w-sm mx-auto overflow-hidden shadow-md">
       <div className="relative">
-        <img
-          src={ad?.imageUrl}
-          alt={ad?.title}
-          className="w-full h-44 object-cover"
-        />
+        {ad?.imageUrl ? (
+          <img
+            src={ad.imageUrl}
+            alt={ad?.title}
+            className="w-full h-44 object-cover"
+          />
+        ) : (
+          <div className="flex h-44 w-full items-center justify-center bg-gradient-to-r from-amber-100 via-yellow-100 to-orange-100 text-center text-sm font-semibold text-slate-700">
+            {ad?.bannerText || ad?.title || 'Text Ad'}
+          </div>
+        )}
         <div className="absolute top-2 left-2 flex gap-2">
           {ad?.isActive && (
             <Badge className="bg-green-500">Active</Badge>
@@ -107,10 +114,10 @@ const adFormElements = [
     name: "position",
     componentType: "select",
     options: [
+      { id: "top", label: "Header Carousel / Top" },
+      { id: "text", label: "Text Ticker / Breaking Ad" },
       { id: "sidebar", label: "Sidebar" },
-      { id: "header", label: "Header" },
-      { id: "footer", label: "Footer" },
-      { id: "popup", label: "Popup" },
+      { id: "bottom", label: "Bottom" },
     ],
   },
   {
@@ -191,15 +198,16 @@ function AdminAds() {
   async function fetchAds() {
     try {
       const { data } = await privateClient.get('/admin/ads');
-      setAdList(data.data || []);
+      const items = data?.data ?? data ?? [];
+      setAdList(Array.isArray(items) ? items : []);
     } catch (err) {
       console.error(err);
+      setAdList([]);
     }
   }
 
   function isFormValid() {
-    const requiredFields = ["title", "linkUrl"];
-    return requiredFields.every(field => formData[field] && formData[field].toString().trim() !== "");
+    return formData.title && formData.title.toString().trim() !== "";
   }
 
   async function onSubmit(event) {
@@ -213,32 +221,48 @@ function AdminAds() {
         priority: parseInt(formData.priority) || 1,
       };
 
+      let response;
       if (currentEditedId !== null) {
-        await privateClient.put(`/admin/ads/${currentEditedId}`, payload);
+        response = await privateClient.put(`/admin/ads/${currentEditedId}`, payload);
       } else {
-        await privateClient.post('/admin/ads', payload);
+        response = await privateClient.post('/admin/ads', payload);
       }
+
+      const savedAd = response?.data?.data ?? response?.data ?? null;
+
+      setAdList((prev) => {
+        if (!savedAd) return prev;
+
+        if (currentEditedId !== null) {
+          return prev.map(item => (item._id === savedAd._id ? savedAd : item));
+        }
+
+        return [savedAd, ...prev.filter(item => item._id !== savedAd._id)];
+      });
 
       setFormData(initialFormData);
       setOpenCreateAdDialog(false);
       setImageFile(null);
       setUploadedImageUrl("");
       setCurrentEditedId(null);
-      fetchAds();
+      await fetchAds();
+      toast.success(currentEditedId !== null ? "Ad updated successfully" : "Ad created successfully");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to save ad");
     }
   }
 
-  function handleDelete(adId) {
-    (async () => {
-      try {
-        await privateClient.delete(`/admin/ads/${adId}`);
-        fetchAds();
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+  async function handleDelete(adId) {
+    try {
+      await privateClient.delete(`/admin/ads/${adId}`);
+      setAdList((prev) => prev.filter(ad => ad._id !== adId));
+      await fetchAds();
+      toast.success("Ad deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete ad");
+    }
   }
 
   return (
@@ -282,7 +306,7 @@ function AdminAds() {
           setImageFile(null);
         }}
       >
-        <SheetContent side="right" className="overflow-auto">
+        <SheetContent side="right" className="overflow-auto px-6 sm:max-w-xl w-[92vw]">
           <SheetHeader>
             <SheetTitle>
               {currentEditedId !== null ? "Edit Ad" : "Create New Ad"}
@@ -300,31 +324,33 @@ function AdminAds() {
             />
 
             {/* Image upload control */}
-            <div className="p-4 border rounded-md mt-4">
-              <label className="block text-sm font-medium text-gray-700">Ad Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const f = e.target.files?.[0] || null;
-                  setImageFile(f);
-                }}
-                className="mt-1"
-              />
+            {formData.position !== "text" && (
+              <div className="p-4 border rounded-md mt-4">
+                <label className="block text-sm font-medium text-gray-700">Ad Image (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    setImageFile(f);
+                  }}
+                  className="mt-1"
+                />
 
-              <div className="mt-2">
-                {imageLoadingState ? (
-                  <span className="text-sm text-gray-600">Uploading image...</span>
-                ) : uploadedImageUrl ? (
-                  <div className="flex items-center gap-2">
-                    <img src={uploadedImageUrl} alt="uploaded" className="w-24 h-16 object-cover rounded" />
-                    <span className="text-sm text-green-600">Image uploaded</span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-gray-500">No image uploaded yet. Select a file to upload.</span>
-                )}
+                <div className="mt-2">
+                  {imageLoadingState ? (
+                    <span className="text-sm text-gray-600">Uploading image...</span>
+                  ) : uploadedImageUrl ? (
+                    <div className="flex items-center gap-2">
+                      <img src={uploadedImageUrl} alt="uploaded" className="w-24 h-16 object-cover rounded" />
+                      <span className="text-sm text-green-600">Image uploaded</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500">Optional for image-based ads. Leave empty for text-only ads.</span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </SheetContent>
       </Sheet>

@@ -13,7 +13,7 @@ const AdSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      required: true,
+      default: "",
     },
     linkUrl: {
       type: String,
@@ -25,7 +25,7 @@ const AdSchema = new mongoose.Schema(
     },
     position: {
       type: String,
-      enum: ["top", "sidebar", "bottom"],
+      enum: ["top", "header", "sidebar", "bottom", "text", "ticker", "marquee"],
       default: "sidebar",
     },
     isActive: {

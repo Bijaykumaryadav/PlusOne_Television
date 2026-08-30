@@ -5,7 +5,7 @@
   
   <!-- Homepage -->
   <url>
-    <loc>https://sdhareporting.com/</loc>
+    <loc>https://sidhareporting.com/</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Articles Page -->
   <url>
-    <loc>https://sdhareporting.com/articles</loc>
+    <loc>https://sidhareporting.com/articles</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
@@ -23,7 +23,7 @@
 
   <!-- Category Pages -->
   <url>
-    <loc>https://sdhareporting.com/articles?category=breaking</loc>
+    <loc>https://sidhareporting.com/articles?category=breaking</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
@@ -31,7 +31,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=politics</loc>
+    <loc>https://sidhareporting.com/articles?category=politics</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -39,7 +39,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=business</loc>
+    <loc>https://sidhareporting.com/articles?category=business</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -47,7 +47,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=sports</loc>
+    <loc>https://sidhareporting.com/articles?category=sports</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -55,7 +55,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=technology</loc>
+    <loc>https://sidhareporting.com/articles?category=technology</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -63,7 +63,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=entertainment</loc>
+    <loc>https://sidhareporting.com/articles?category=entertainment</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -71,7 +71,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=health</loc>
+    <loc>https://sidhareporting.com/articles?category=health</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -79,7 +79,7 @@
   </url>
 
   <url>
-    <loc>https://sdhareporting.com/articles?category=world</loc>
+    <loc>https://sidhareporting.com/articles?category=world</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -88,7 +88,7 @@
 
   <!-- Premium/Payment Page -->
   <url>
-    <loc>https://sdhareporting.com/payment</loc>
+    <loc>https://sidhareporting.com/payment</loc>
     <lastmod>2024-01-01T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

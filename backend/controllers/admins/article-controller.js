@@ -2,6 +2,94 @@ const Article = require("../../models/article");
 const cloudinary = require("../../config/cloudinary");
 const streamifier = require('streamifier');
 
+const normalizeSlug = (value = "") => {
+  let safeValue = value?.toString() || "";
+
+  try {
+    safeValue = decodeURIComponent(safeValue);
+  } catch (error) {
+    // Ignore malformed percent encoding and use the original value.
+  }
+
+  return safeValue
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\u0900-\u097f\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "article";
+};
+
+const normalizeEnglishSlug = (value = "") => {
+  let safeValue = value?.toString() || "";
+
+  try {
+    safeValue = decodeURIComponent(safeValue);
+  } catch (error) {
+    // Ignore malformed percent encoding and use the original value.
+  }
+
+  return safeValue
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "article";
+};
+
+const findArticleByIdentifier = async (identifier) => {
+  const rawId = identifier?.toString();
+  if (!rawId) return null;
+
+  const decodedId = (() => {
+    try {
+      return decodeURIComponent(rawId);
+    } catch (error) {
+      return rawId;
+    }
+  })();
+
+  const exactCandidates = Array.from(
+    new Set([rawId, decodedId, rawId.replace(/\+/g, " "), decodedId.replace(/\+/g, " ")])
+  );
+
+  const objectIdCandidates = exactCandidates.filter((value) => /^[0-9a-fA-F]{24}$/.test(value));
+
+  const directMatch = await Article.findOne({
+    $or: [
+      ...(objectIdCandidates.length ? [{ _id: { $in: objectIdCandidates } }] : []),
+      { slug: { $in: exactCandidates } },
+      { slugEn: { $in: exactCandidates } },
+      { title: { $in: exactCandidates } },
+    ],
+  }).exec();
+
+  if (directMatch) return directMatch;
+
+  const target = normalizeSlug(decodedId);
+  const englishTarget = normalizeEnglishSlug(decodedId);
+  const fallback = await Article.find({ status: "published" })
+    .select("_id title slug slugEn")
+    .lean();
+
+  const match = fallback.find((article) => {
+    const articleSlug = normalizeSlug(article.slug || article.title || "");
+    const articleTitle = normalizeSlug(article.title || "");
+    const articleEnglishSlug = normalizeEnglishSlug(article.slugEn || article.title || "");
+    const articleEnglishTitle = normalizeEnglishSlug(article.title || "");
+    return articleSlug === target || articleTitle === target || articleEnglishSlug === englishTarget || articleEnglishTitle === englishTarget;
+  });
+
+  if (!match) return null;
+
+  return Article.findById(match._id).exec();
+};
+
 // @desc    Get all articles
 // @route   GET /api/articles
 // @access  Public
@@ -59,13 +147,18 @@ const getAllArticles = async (req, res) => {
 // @access  Public
 const getArticleById = async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id);
-    
+    const article = await findArticleByIdentifier(req.params.id);
+
     if (!article) {
       return res.status(404).json({
         success: false,
         message: "Article not found",
       });
+    }
+
+    if (!article.slug && article.title) {
+      article.slug = normalizeSlug(article.title);
+      await article.save();
     }
     
     // Increment views
@@ -94,6 +187,8 @@ const createArticle = async (req, res) => {
     const {
       image,
       title,
+      routeTitleNe,
+      routeTitleEn,
       summary,
       content,
       category,
@@ -114,6 +209,10 @@ const createArticle = async (req, res) => {
     const article = await Article.create({
       image,
       title,
+      routeTitleNe: routeTitleNe || title,
+      routeTitleEn: routeTitleEn || "",
+      slug: normalizeSlug(routeTitleNe || title),
+      slugEn: routeTitleEn ? normalizeEnglishSlug(routeTitleEn) : normalizeSlug(routeTitleNe || title),
       summary,
       content,
       category,
@@ -162,6 +261,8 @@ const updateArticle = async (req, res) => {
     const {
       image,
       title,
+      routeTitleNe,
+      routeTitleEn,
       summary,
       content,
       category,
@@ -183,6 +284,11 @@ const updateArticle = async (req, res) => {
     // Update fields
     article.image = image || article.image;
     article.title = title || article.title;
+    article.routeTitleNe = routeTitleNe || article.title;
+    article.routeTitleEn = routeTitleEn || "";
+    if (routeTitleNe || title) article.slug = normalizeSlug(routeTitleNe || title || article.title);
+    if (routeTitleEn) article.slugEn = normalizeEnglishSlug(routeTitleEn);
+    if (!routeTitleEn && (routeTitleNe || title)) article.slugEn = normalizeSlug(routeTitleNe || title || article.title);
     article.summary = summary || article.summary;
     article.content = content || article.content;
     article.category = category || article.category;

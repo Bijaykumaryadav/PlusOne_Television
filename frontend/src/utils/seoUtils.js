@@ -3,6 +3,56 @@
  * Use this utility to generate schema markup for articles and pages
  */
 
+export const makeSeoSlug = (title = "") => {
+  if (!title) return "";
+
+  return String(title)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+};
+
+export const makeEnglishSeoSlug = (title = "") => {
+  if (!title) return "";
+
+  return String(title)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+};
+
+export const buildArticleUrl = (article) => {
+  if (!article) return "/articles";
+
+  if (typeof article === "string") {
+    const rawValue = article.trim();
+    if (!rawValue) return "/articles/article";
+    return `/articles/${encodeURIComponent(rawValue)}`;
+  }
+
+  const preferredSlug =
+    article.routeTitleEn ||
+    article.routeTitleNe ||
+    article.slugEn ||
+    article.slug ||
+    makeEnglishSeoSlug(article.title || "") ||
+    makeSeoSlug(article.title || "");
+
+  if (!preferredSlug) return `/articles/${article._id || "article"}`;
+
+  return `/articles/${encodeURIComponent(preferredSlug)}`;
+};
+
 /**
  * Generate Article Schema
  * @param {Object} article - Article data
@@ -26,12 +76,12 @@ export const generateArticleSchema = (article) => {
       "name": "Sidha Reporting",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://sdhareporting.com/logofinal.png",
+        "url": "https://sidhareporting.com/logofinal.png",
       },
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://sdhareporting.com/articles/${article._id}`,
+      "@id": `https://sidhareporting.com${buildArticleUrl(article)}`,
     },
     "articleSection": article.category,
     "keywords": article.tags || "",
@@ -48,8 +98,8 @@ export const generateOrganizationSchema = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Sidha Reporting",
-    "url": "https://sdhareporting.com",
-    "logo": "https://sdhareporting.com/logofinal.png",
+    "url": "https://sidhareporting.com",
+    "logo": "https://sidhareporting.com/logofinal.png",
     "description": "Breaking News, Politics, Business, Sports, Technology, Entertainment - Sidha Reporting delivers latest news updates.",
     "sameAs": [
       "https://facebook.com/sidha-reporting",
@@ -59,7 +109,7 @@ export const generateOrganizationSchema = () => {
     "contact": {
       "@type": "ContactPoint",
       "contactType": "Customer Support",
-      "email": "support@sdhareporting.com",
+      "email": "support@sidhareporting.com",
     },
   };
 };
@@ -73,13 +123,13 @@ export const generateWebsiteSchema = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Sidha Reporting",
-    "url": "https://sdhareporting.com",
+    "url": "https://sidhareporting.com",
     "description": "Latest news, breaking news, and updates on politics, business, sports, technology, and entertainment.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://sdhareporting.com/articles?q={search_term_string}",
+        "urlTemplate": "https://sidhareporting.com/articles?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
@@ -211,17 +261,17 @@ export const setupArticleSEO = (article) => {
     twitterTitle: article.title,
     twitterDescription: article.summary,
     twitterImage: article.image,
-    canonical: `https://sdhareporting.com/articles/${article._id}`,
+    canonical: `https://sidhareporting.com${buildArticleUrl(article)}`,
   };
 
   updateMetaTags(metadata);
 
   // Generate breadcrumb schema
   const breadcrumbs = [
-    { label: "Home", url: "https://sdhareporting.com" },
-    { label: "Articles", url: "https://sdhareporting.com/articles" },
-    { label: article.category, url: `https://sdhareporting.com/articles?category=${article.category}` },
-    { label: article.title, url: `https://sdhareporting.com/articles/${article._id}` },
+    { label: "Home", url: "https://siidhareporting.com" },
+    { label: "Articles", url: "https://sidhareporting.com/articles" },
+    { label: article.category, url: `https://sidhareporting.com/articles?category=${article.category}` },
+    { label: article.title, url: `https://sidhareporting.com${buildArticleUrl(article)}` },
   ];
   
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
@@ -247,8 +297,8 @@ export const setupHomepageSEO = () => {
     keywords: "news, breaking news, politics, sports, business, technology, entertainment, health, world news",
     ogTitle: "Sidha Reporting - Latest News",
     ogDescription: "Breaking News and latest updates on politics, business, sports, technology and more",
-    ogImage: "https://sdhareporting.com/logofinal.png",
-    canonical: "https://sdhareporting.com",
+    ogImage: "https://sidhareporting.com/logofinal.png",
+    canonical: "https://sidhareporting.com",
   };
 
   updateMetaTags(metadata);
@@ -277,7 +327,7 @@ export const setupCategorySEO = (category) => {
     keywords: `${category}, news, ${category} news, breaking news`,
     ogTitle: label,
     ogDescription: `Latest ${label} updates`,
-    canonical: `https://sdhareporting.com/articles?category=${category}`,
+    canonical: `https://sidhareporting.com/articles?category=${category}`,
   };
 
   updateMetaTags(metadata);

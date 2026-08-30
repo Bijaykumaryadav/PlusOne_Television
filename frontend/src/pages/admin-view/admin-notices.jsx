@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,8 +33,10 @@ export default function AdminNotices() {
     if (editingId) {
       setNotices(notices.map(n => n.id === editingId ? { ...form, id: editingId } : n));
       setEditingId(null);
+      toast.success('Notice updated successfully');
     } else {
       setNotices([{ ...form, id: Date.now() }, ...notices]);
+      toast.success('Notice created successfully');
     }
     setForm(EMPTY_FORM);
     setShowForm(false);
@@ -48,6 +51,7 @@ export default function AdminNotices() {
   const handleDelete = (id) => {
     setNotices(notices.filter(n => n.id !== id));
     setDeleteConfirm(null);
+    toast.success('Notice deleted successfully');
   };
 
   const handleCancel = () => {

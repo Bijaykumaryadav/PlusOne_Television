@@ -40,7 +40,7 @@
 ### Step 1: Update Configuration Files
 
 1. **Update Base URL**
-   - In `SEO_CONFIGURATION.md`: Replace `https://sdhareporting.com` with actual domain
+   - In `SEO_CONFIGURATION.md`: Replace `https://sidhareporting.com` with actual domain
    - In `public/robots.txt`: Update sitemap URL
    - In `frontend/index.html`: Update meta tags with actual domain
 
@@ -172,7 +172,7 @@ Update these files with your actual domain:
 
 **frontend/index.html**
 ```html
-<!-- Change sdhareporting.com to your domain -->
+<!-- Change sidhareporting.com to your domain -->
 <meta property="og:url" content="https://yourdomain.com" />
 <link rel="canonical" href="https://yourdomain.com" />
 ```
@@ -185,9 +185,9 @@ const baseUrl = process.env.FRONTEND_URL || 'https://yourdomain.com';
 **SEO_CONFIGURATION.md**
 ```markdown
 Replace all instances of:
-- sdhareporting.com → yourdomain.com
+- sidhareporting.com → yourdomain.com
 - @sidha_reporting → your social handles
-- support@sdhareporting.com → your support email
+- support@sidhareporting.com → your support email
 ```
 
 ## Monitoring URLs

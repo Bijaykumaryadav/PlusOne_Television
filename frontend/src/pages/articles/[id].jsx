@@ -4,7 +4,8 @@ import { publicClient } from '@/services/axiosInstance';
 import UsersHeader from '@/components/users-view/users-header';
 import UsersFooter from '@/components/users-view/users-footer';
 import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, ChevronLeft, Linkedin, Eye } from 'lucide-react';
-import { copyToClipboard } from '@/utils/shareUtils';
+import { copyToClipboard, setArticleMetaTags } from '@/utils/shareUtils';
+import { buildArticleUrl } from '@/utils/seoUtils';
 import { Button } from '@/components/ui/button';
 
 // ─── inject / update <meta> tags dynamically ───────────────────────────────
@@ -21,24 +22,30 @@ const setMetaTag = (property, content, isName = false) => {
 };
 
 const injectOGMeta = (article) => {
-  const url = `${window.location.origin}/articles/${article._id}`;
-  document.title = article.title;
+  const articleImage = article.image
+    ? (article.image.startsWith('http://') || article.image.startsWith('https://') ? article.image : `https://sidhareporting.com${article.image}`)
+    : 'https://sidhareporting.com/logofinal.png';
+  const url = `${window.location.origin}${buildArticleUrl(article)}`;
+  document.title = `${article.title} | Sidha Reporting`;
 
   // Open Graph (Facebook, LinkedIn, WhatsApp)
-  setMetaTag('og:title',       article.title);
+  setMetaTag('og:title', article.title);
   setMetaTag('og:description', article.summary || article.title);
-  setMetaTag('og:image',       article.image);
+  setMetaTag('og:image', articleImage);
+  setMetaTag('og:image:secure_url', articleImage);
   setMetaTag('og:image:width', '1200');
-  setMetaTag('og:image:height','630');
-  setMetaTag('og:url',         url);
-  setMetaTag('og:type',        'article');
-  setMetaTag('og:site_name',   'Sidha Reporting');
+  setMetaTag('og:image:height', '630');
+  setMetaTag('og:image:alt', article.title);
+  setMetaTag('og:url', url);
+  setMetaTag('og:type', 'article');
+  setMetaTag('og:site_name', 'Sidha Reporting');
 
   // Twitter Card
-  setMetaTag('twitter:card',        'summary_large_image', true);
-  setMetaTag('twitter:title',       article.title,         true);
-  setMetaTag('twitter:description', article.summary || '', true);
-  setMetaTag('twitter:image',       article.image,         true);
+  setMetaTag('twitter:card', 'summary_large_image', true);
+  setMetaTag('twitter:title', article.title, true);
+  setMetaTag('twitter:description', article.summary || article.title, true);
+  setMetaTag('twitter:image', articleImage, true);
+  setMetaTag('twitter:image:alt', article.title, true);
 
   // Canonical
   let canonical = document.querySelector('link[rel="canonical"]');
@@ -64,7 +71,7 @@ const cleanupMeta = () => {
 
 // ─── social share URLs ──────────────────────────────────────────────────────
 const buildShareUrl = (platform, article) => {
-  const url   = encodeURIComponent(`${window.location.origin}/articles/${article._id}`);
+  const url   = encodeURIComponent(`${window.location.origin}${buildArticleUrl(article)}`);
   const title = encodeURIComponent(article.title);
   const img   = encodeURIComponent(article.image || '');
 
@@ -85,7 +92,7 @@ const buildShareUrl = (platform, article) => {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 const ArticleDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [article, setArticle]     = useState(null);
@@ -107,7 +114,7 @@ const ArticleDetail = () => {
       try {
         setLoading(true);
         setError(null);
-        const { data } = await publicClient.get(`/articles/${id}`);
+        const { data } = await publicClient.get(`/articles/${slug}`);
         if (mounted && data?.data) {
           const a = data.data;
           setArticle(a);
@@ -116,9 +123,10 @@ const ArticleDetail = () => {
           setViewCount(a.views       || 0);
 
           const liked = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-          setLiked(liked.includes(id));
+          setLiked(liked.includes(a._id));
 
           // Inject OG meta so social crawlers & share previews pick up image+title
+          setArticleMetaTags(a);
           injectOGMeta(a);
         } else {
           setError('Article not found');
@@ -133,7 +141,7 @@ const ArticleDetail = () => {
       mounted = false;
       cleanupMeta();
     };
-  }, [id]);
+  }, [slug]);
 
   // ── close share dropdown on outside click ──
   useEffect(() => {
@@ -155,19 +163,19 @@ const ArticleDetail = () => {
 
     try {
       if (wasLiked) {
-        await publicClient.delete(`/articles/${id}/like`, { data: { userId: 'guest-user' } });
+        await publicClient.delete(`/articles/${article._id}/like`, { data: { userId: 'guest-user' } });
         const stored = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-        localStorage.setItem('likedArticles', JSON.stringify(stored.filter(aid => aid !== id)));
+        localStorage.setItem('likedArticles', JSON.stringify(stored.filter(aid => aid !== article._id)));
       } else {
-        await publicClient.post(`/articles/${id}/like`, { userId: 'guest-user' });
+        await publicClient.post(`/articles/${article._id}/like`, { userId: 'guest-user' });
         const stored = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-        if (!stored.includes(id)) {
-          stored.push(id);
+        if (!stored.includes(article._id)) {
+          stored.push(article._id);
           localStorage.setItem('likedArticles', JSON.stringify(stored));
         }
       }
       // Sync real count from server
-      const { data } = await publicClient.get(`/articles/${id}`);
+      const { data } = await publicClient.get(`/articles/${slug}`);
       if (data?.data) setLikeCount(data.data.likeCount || 0);
     } catch (err) {
       // Rollback on failure
@@ -187,9 +195,9 @@ const ArticleDetail = () => {
 
     // Track on backend
     try {
-      await publicClient.post(`/articles/${id}/share`);
+      await publicClient.post(`/articles/${article._id}/share`);
       // Sync real count
-      const { data } = await publicClient.get(`/articles/${id}`);
+      const { data } = await publicClient.get(`/articles/${slug}`);
       if (data?.data) setShareCount(data.data.shareCount || 0);
     } catch (err) {
       console.error('Share tracking error:', err);
@@ -204,13 +212,13 @@ const ArticleDetail = () => {
 
   // ── copy link ──
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}/articles/${article._id}`;
+    const url = `${window.location.origin}${buildArticleUrl(article)}`;
     copyToClipboard(url);
     setShareOpen(false);
     setShareCount(prev => prev + 1);
     try {
-      await publicClient.post(`/articles/${id}/share`);
-      const { data } = await publicClient.get(`/articles/${id}`);
+      await publicClient.post(`/articles/${article._id}/share`);
+      const { data } = await publicClient.get(`/articles/${slug}`);
       if (data?.data) setShareCount(data.data.shareCount || 0);
     } catch (err) {
       console.error('Copy share tracking error:', err);
@@ -277,7 +285,7 @@ const ArticleDetail = () => {
     </div>
   );
 
-  const articleUrl = `${window.location.origin}/articles/${article._id}`;
+  const articleUrl = `${window.location.origin}${buildArticleUrl(article)}`;
 
   // ─── Main Render ───
   return (
