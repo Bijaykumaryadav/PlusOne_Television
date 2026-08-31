@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const dbConnection = async () => {
-  const mongoUri = process.env.MONGO_URL || "mongodb://mongo:27017/SidhaReporting";
+const dbConnection = async() => {
 
-  try {
-    await mongoose.connect(mongoUri, {
-      dbName: "SidhaReporting",
+    try{
+        await mongoose.connect(process.env.MONGO_URL,{
+        dbName: "SidhaReporting",
     });
     console.log("Successfully Connected to the database");
-  } catch (error) {
-    console.error("Error in creating the database:", error.message);
-  }
-};
+
+    }catch(error){
+        console.log("Error in creating the database",error);
+    }
+}
 
 module.exports = dbConnection;

@@ -74,7 +74,7 @@ const corsOptions = {
       "https://sidhareporting.com",
       "https://www.sidhareporting.com",
       "http://localhost:5173",
-      "http://localhost:3000",
+      "http://localhost:3000", 
       // For development only
       "http://72.60.223.137:5173",
       "http://72.60.223.137:3000"
