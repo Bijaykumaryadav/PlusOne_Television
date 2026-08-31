@@ -42,10 +42,11 @@ export default function UsersFooter() {
               <h4 className="text-white font-bold text-lg mb-4">About Us</h4>
               <div className="text-sm leading-relaxed mb-4">
                 <p>Company : Sidha Media Group Pvt. Ltd.</p>
-                <p>Address : Birgunj, Parsa, Nepal.</p>
+                <p>Address : Birgunj-16, Parsa, Nepal.</p>
                 <p>Phone :+977 9855013123</p>
                 <p>E-mail : sidhareporting@gmail.com</p>
                 <p>Mass Communication Authority Registration No. : 00102/082-83</p>
+                <p>Media Council : 00102/082-83</p>
               </div>
               <div className="flex gap-3">
                 {[
