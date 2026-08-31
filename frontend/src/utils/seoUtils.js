@@ -31,10 +31,6 @@ export const makeEnglishSeoSlug = (title = "") => {
     .replace(/^-|-$/g, "");
 };
 
-const isReadableAsciiSlug = (value = "") => {
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(String(value).trim());
-};
-
 export const buildArticleUrl = (article) => {
   if (!article) return "/articles";
 
@@ -44,9 +40,13 @@ export const buildArticleUrl = (article) => {
     return `/articles/${encodeURIComponent(rawValue)}`;
   }
 
-  const englishRoute = makeEnglishSeoSlug(article.routeTitleEn || "");
-  const englishSlug = makeEnglishSeoSlug(article.slugEn || "");
-  const preferredSlug = [englishRoute, englishSlug].find(isReadableAsciiSlug) || article._id || "article";
+  const preferredSlug =
+    article.routeTitleEn ||
+    article.routeTitleNe ||
+    article.slugEn ||
+    article.slug ||
+    makeEnglishSeoSlug(article.title || "") ||
+    makeSeoSlug(article.title || "");
 
   if (!preferredSlug) return `/articles/${article._id || "article"}`;
 
