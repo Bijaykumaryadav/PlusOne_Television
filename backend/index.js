@@ -28,13 +28,24 @@ const isCrawlerRequest = (req) => {
   return /(facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|slackbot|googlebot|bingbot|duckduckbot|baiduspider|yandex|facebot|embedly|crawler|spider)/i.test(userAgent);
 };
 
+const getArticleRoute = (article) => {
+  const englishRoute = String(article.routeTitleEn || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return englishRoute || (/^[a-f0-9]{24}$/i.test(String(article._id || "")) ? article._id : article.slugEn || article.slug);
+};
+
 const buildSocialMetaPage = (article) => {
   const title = article.title || "Sidha Reporting";
   const description = article.summary || "Read the latest update from Sidha Reporting.";
   const image = article.image
     ? (/^https?:\/\//i.test(article.image) ? article.image : `https://sidhareporting.com${article.image.startsWith("/") ? article.image : `/${article.image}`}`)
     : "https://sidhareporting.com/logofinal.png";
-    const slug = article.slugEn || article.slug || encodeURIComponent(title);
+    const slug = getArticleRoute(article) || encodeURIComponent(title);
     const url = `https://sidhareporting.com/articles/${encodeURIComponent(slug)}`;
     const publishedDate = article.publishedDate ? new Date(article.publishedDate).toISOString() : "";
     const tags = Array.isArray(article.tags)
