@@ -31,48 +31,6 @@ export const makeEnglishSeoSlug = (title = "") => {
     .replace(/^-|-$/g, "");
 };
 
-export const getArticleSeoKeywords = (article = {}) => {
-  const title = String(article.title || "").trim();
-  const routeTitle = String(
-    article.routeTitleEn ||
-    article.routeTitleNe ||
-    article.slugEn ||
-    article.slug ||
-    title || ""
-  ).trim();
-  const category = String(article.category || "News").trim();
-  const rawTags = Array.isArray(article.tags)
-    ? article.tags
-    : String(article.tags || "")
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean);
-
-  const keywordPool = [
-    title,
-    routeTitle,
-    `${category} news`,
-    `${category} Nepal`,
-    `${category} latest news`,
-    "Nepal news",
-    "breaking news Nepal",
-    "latest Nepal news",
-    "Kathmandu news",
-    "Nepal politics news",
-    "Nepal business news",
-    "Nepal sports news",
-    "world news Nepal",
-    ...rawTags,
-  ];
-
-  return [...new Set(
-    keywordPool
-      .map((value) => String(value || "").replace(/\s+/g, " ").trim())
-      .filter(Boolean)
-      .filter((value) => value.length > 2)
-  )].slice(0, 18);
-};
-
 export const buildArticleUrl = (article) => {
   if (!article) return "/articles";
 
@@ -82,18 +40,13 @@ export const buildArticleUrl = (article) => {
     return `/articles/${encodeURIComponent(rawValue)}`;
   }
 
-  const routeSource =
+  const preferredSlug =
     article.routeTitleEn ||
     article.routeTitleNe ||
     article.slugEn ||
     article.slug ||
-    article.title ||
-    "";
-
-  const preferredSlug =
-    makeEnglishSeoSlug(routeSource) ||
-    makeSeoSlug(routeSource) ||
-    String(routeSource).trim();
+    makeEnglishSeoSlug(article.title || "") ||
+    makeSeoSlug(article.title || "");
 
   if (!preferredSlug) return `/articles/${article._id || "article"}`;
 
@@ -106,23 +59,17 @@ export const buildArticleUrl = (article) => {
  * @returns {Object} JSON-LD schema object
  */
 export const generateArticleSchema = (article) => {
-  const articleUrl = `https://sidhareporting.com${buildArticleUrl(article)}`;
-  const sourceTags = Array.isArray(article.tags)
-    ? article.tags
-    : String(article.tags || "").split(",").map((tag) => tag.trim()).filter(Boolean);
-  const seoKeywords = getArticleSeoKeywords(article);
-
   return {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     "headline": article.title,
-    "description": article.summary || article.title,
-    "image": article.image || "https://sidhareporting.com/logofinal.png",
-    "datePublished": article.publishedDate || new Date().toISOString(),
-    "dateModified": article.updatedDate || article.publishedDate || new Date().toISOString(),
+    "description": article.summary,
+    "image": article.image,
+    "datePublished": article.publishedDate,
+    "dateModified": article.updatedDate || article.publishedDate,
     "author": {
       "@type": "Person",
-      "name": article.author || "Sidha Reporting",
+      "name": article.author,
     },
     "publisher": {
       "@type": "Organization",
@@ -134,19 +81,11 @@ export const generateArticleSchema = (article) => {
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": articleUrl,
+      "@id": `https://sidhareporting.com${buildArticleUrl(article)}`,
     },
-    "articleSection": article.category || "News",
-    "keywords": [...new Set([...sourceTags, ...seoKeywords])].join(", "),
-    "articleBody": article.content || article.summary || article.title,
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "WebSite",
-      "name": "Sidha Reporting",
-      "url": "https://sidhareporting.com",
-    },
-    "url": articleUrl,
-    "wordCount": article.content ? article.content.split(/\s+/).length : undefined,
+    "articleSection": article.category,
+    "keywords": article.tags || "",
+    "articleBody": article.content,
   };
 };
 
@@ -161,7 +100,7 @@ export const generateOrganizationSchema = () => {
     "name": "Sidha Reporting",
     "url": "https://sidhareporting.com",
     "logo": "https://sidhareporting.com/logofinal.png",
-    "description": "Nepal news, breaking news, politics, business, sports, technology and world updates from Sidha Reporting.",
+    "description": "Breaking News, Politics, Business, Sports, Technology, Entertainment - Sidha Reporting delivers latest news updates.",
     "sameAs": [
       "https://facebook.com/sidha-reporting",
       "https://twitter.com/sidha_reporting",
@@ -172,16 +111,6 @@ export const generateOrganizationSchema = () => {
       "contactType": "Customer Support",
       "email": "support@sidhareporting.com",
     },
-    "areaServed": "Nepal",
-    "knowsAbout": [
-      "Nepal news",
-      "breaking news Nepal",
-      "Nepal politics",
-      "Nepal business news",
-      "Nepal sports news",
-      "technology news Nepal",
-      "world news Nepal"
-    ]
   };
 };
 
@@ -195,8 +124,7 @@ export const generateWebsiteSchema = () => {
     "@type": "WebSite",
     "name": "Sidha Reporting",
     "url": "https://sidhareporting.com",
-    "description": "Latest Nepal news, breaking stories, politics, business, sports, technology and world updates from Sidha Reporting.",
-    "inLanguage": ["en", "ne"],
+    "description": "Latest news, breaking news, and updates on politics, business, sports, technology, and entertainment.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -205,11 +133,6 @@ export const generateWebsiteSchema = () => {
       },
       "query-input": "required name=search_term_string",
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Sidha Reporting",
-      "logo": "https://sidhareporting.com/logofinal.png"
-    }
   };
 };
 
@@ -318,10 +241,6 @@ export const updateMetaTags = (metadata) => {
   }
 };
 
-/**
- * Setup SEO for Article Page
- * Call this in useEffect on article detail page
- */
 export const setPageSEO = ({
   title,
   description,
@@ -331,70 +250,53 @@ export const setPageSEO = ({
   ogDescription,
   ogImage = "https://sidhareporting.com/logofinal.png",
 }) => {
-  const metadata = {
+  updateMetaTags({
     title,
     description,
     keywords,
+    canonical: canonical || "https://sidhareporting.com",
     ogTitle: ogTitle || title,
     ogDescription: ogDescription || description,
     ogImage,
     twitterTitle: ogTitle || title,
     twitterDescription: ogDescription || description,
     twitterImage: ogImage,
-    canonical: canonical || "https://sidhareporting.com",
-  };
-
-  updateMetaTags(metadata);
+  });
 };
 
+/**
+ * Setup SEO for Article Page
+ * Call this in useEffect on article detail page
+ */
 export const setupArticleSEO = (article) => {
-  if (!article) return;
-
+  // Generate and insert schema
   const schema = generateArticleSchema(article);
   insertSchemaScript(schema, "article-schema");
 
-  const title = String(article.title || "").trim();
-  const routeTitle = String(
-    article.routeTitleEn ||
-    article.routeTitleNe ||
-    article.slugEn ||
-    article.slug ||
-    title || ""
-  ).trim();
-  const category = String(article.category || "News").trim();
-  const seoKeywords = getArticleSeoKeywords(article);
-  const primaryKeyword = routeTitle || title || `${category} news`;
-  const description = (article.summary || article.title || "Latest Nepal news and updates")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 165);
-
-  const seoTitle = `${title} | ${primaryKeyword} | Sidha Reporting`;
-  const canonicalUrl = `https://sidhareporting.com${buildArticleUrl(article)}`;
-
+  // Update meta tags
   const metadata = {
-    title: seoTitle,
-    description,
-    keywords: seoKeywords.join(", "),
-    news_keywords: seoKeywords.join(", "),
-    ogTitle: title,
-    ogDescription: description,
-    ogImage: article.image || "https://sidhareporting.com/logofinal.png",
-    twitterTitle: title,
-    twitterDescription: description,
-    twitterImage: article.image || "https://sidhareporting.com/logofinal.png",
-    canonical: canonicalUrl,
+    title: `${article.title} | Sidha Reporting`,
+    description: article.summary.substring(0, 160),
+    keywords: article.tags || "news, reporting",
+    ogTitle: article.title,
+    ogDescription: article.summary,
+    ogImage: article.image,
+    twitterTitle: article.title,
+    twitterDescription: article.summary,
+    twitterImage: article.image,
+    canonical: `https://sidhareporting.com${buildArticleUrl(article)}`,
   };
 
   updateMetaTags(metadata);
 
+  // Generate breadcrumb schema
   const breadcrumbs = [
-    { label: "Home", url: "https://sidhareporting.com" },
+    { label: "Home", url: "https://siidhareporting.com" },
     { label: "Articles", url: "https://sidhareporting.com/articles" },
-    { label: category, url: `https://sidhareporting.com/articles?category=${encodeURIComponent(category)}` },
-    { label: title, url: canonicalUrl },
+    { label: article.category, url: `https://sidhareporting.com/articles?category=${article.category}` },
+    { label: article.title, url: `https://sidhareporting.com${buildArticleUrl(article)}` },
   ];
-
+  
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
   insertSchemaScript(breadcrumbSchema, "breadcrumb-schema");
 };
@@ -413,11 +315,11 @@ export const setupHomepageSEO = () => {
 
   // Update meta tags
   const metadata = {
-    title: "Sidha Reporting | Nepal News Today, Breaking News & Updates",
-    description: "Latest Nepal news, breaking stories, politics news, business news, sports updates, technology and world coverage from Sidha Reporting.",
-    keywords: "Nepal news, breaking news Nepal, latest Nepal news, Nepali news, Kathmandu news, Nepal politics news, Nepal business news, Nepal sports news, world news Nepal, Sidha Reporting",
-    ogTitle: "Sidha Reporting | Nepal News Today",
-    ogDescription: "Breaking news and the latest updates from Nepal on politics, business, sports, technology and world affairs.",
+    title: "Sidha Reporting - Latest News, Breaking News & Updates",
+    description: "Breaking News, Politics, Business, Sports, Technology, Entertainment. Get latest news updates from Sidha Reporting.",
+    keywords: "news, breaking news, politics, sports, business, technology, entertainment, health, world news",
+    ogTitle: "Sidha Reporting - Latest News",
+    ogDescription: "Breaking News and latest updates on politics, business, sports, technology and more",
     ogImage: "https://sidhareporting.com/logofinal.png",
     canonical: "https://sidhareporting.com",
   };
@@ -441,28 +343,13 @@ export const setupCategorySEO = (category) => {
   };
 
   const label = categoryLabels[category] || category;
-  const keywordTarget = category === "breaking"
-    ? "Nepal breaking news"
-    : category === "politics"
-    ? "Nepal politics news"
-    : category === "business"
-    ? "Nepal business news"
-    : category === "sports"
-    ? "Nepal sports news"
-    : category === "technology"
-    ? "Nepal technology news"
-    : category === "health"
-    ? "Nepal health news"
-    : category === "world"
-    ? "Nepal world news"
-    : "Nepal news";
 
   const metadata = {
-    title: `${label} | Latest Nepal News | Sidha Reporting`,
-    description: `Get the latest ${label.toLowerCase()} from Nepal with in-depth reporting, breaking updates and analysis from Sidha Reporting.`,
-    keywords: `${keywordTarget}, ${label}, Nepal news, latest Nepal news, breaking news Nepal, Sidha Reporting`,
-    ogTitle: `${label} | Latest Nepal News`,
-    ogDescription: `Latest ${label.toLowerCase()} updates from Nepal and around the world.`,
+    title: `${label} | Sidha Reporting`,
+    description: `Latest ${label} from Sidha Reporting. Stay updated with breaking news and analysis.`,
+    keywords: `${category}, news, ${category} news, breaking news`,
+    ogTitle: label,
+    ogDescription: `Latest ${label} updates`,
     canonical: `https://sidhareporting.com/articles?category=${category}`,
   };
 

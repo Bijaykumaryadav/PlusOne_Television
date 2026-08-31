@@ -29,12 +29,8 @@ services:
       NODE_ENV: production
       PORT: 8000
       FRONTEND_URL: http://localhost:5173
-      MONGO_URL: mongodb://mongo:27017/SidhaReporting
     networks:
       - fullstack-network
-    depends_on:
-      mongo:
-        condition: service_healthy
     restart: unless-stopped
     env_file:
       - ./backend/.env
@@ -45,6 +41,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://sidhareporting.com/apis/v1/
     container_name: react-client
     ports:
       - "5173:3000"
