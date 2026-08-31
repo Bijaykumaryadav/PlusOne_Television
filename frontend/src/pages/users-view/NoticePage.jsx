@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import UsersHeader from '../../components/users-view/users-header';
 import UsersFooter from '../../components/users-view/users-footer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Bell, Calendar, ChevronDown, ChevronUp, AlertCircle, Info, CheckCircle } from 'lucide-react';
+import { setPageSEO } from '@/utils/seoUtils';
 
 const NOTICES = [
   {
@@ -58,6 +59,15 @@ const TYPE_CONFIG = {
 export default function NoticePage() {
   const [expanded, setExpanded] = useState(null);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    setPageSEO({
+      title: 'Newsroom Notices & Updates | Sidha Reporting',
+      description: 'Read official notices, newsroom updates, media announcements, and platform updates from Sidha Reporting.',
+      keywords: 'Sidha Reporting notices, Nepal news updates, newsroom updates, media announcements',
+      canonical: 'https://sidhareporting.com/notices',
+    });
+  }, []);
 
   const filtered = filter === 'all' ? NOTICES : NOTICES.filter(n => n.type === filter);
 

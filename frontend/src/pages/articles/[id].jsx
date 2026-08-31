@@ -5,7 +5,7 @@ import UsersHeader from '@/components/users-view/users-header';
 import UsersFooter from '@/components/users-view/users-footer';
 import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, ChevronLeft, Linkedin, Eye } from 'lucide-react';
 import { copyToClipboard, setArticleMetaTags } from '@/utils/shareUtils';
-import { buildArticleUrl } from '@/utils/seoUtils';
+import { buildArticleUrl, setupArticleSEO } from '@/utils/seoUtils';
 import { Button } from '@/components/ui/button';
 
 // ─── inject / update <meta> tags dynamically ───────────────────────────────
@@ -125,8 +125,9 @@ const ArticleDetail = () => {
           const liked = JSON.parse(localStorage.getItem('likedArticles') || '[]');
           setLiked(liked.includes(a._id));
 
-          // Inject OG meta so social crawlers & share previews pick up image+title
+          // Inject route-specific SEO metadata and schema so article keywords rank in search and social previews
           setArticleMetaTags(a);
+          setupArticleSEO(a);
           injectOGMeta(a);
         } else {
           setError('Article not found');

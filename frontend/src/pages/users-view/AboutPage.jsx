@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { getAboutContent } from '@/lib/siteContent';
+import { setPageSEO } from '@/utils/seoUtils';
 
 const ICONS = {
   Email: <Mail className="w-5 h-5 text-red-600" />,
@@ -26,6 +27,12 @@ export default function AboutPage() {
 
   useEffect(() => {
     setContent(getAboutContent());
+    setPageSEO({
+      title: 'About Sidha Reporting | Nepal News and Journalism',
+      description: 'Learn about Sidha Reporting, our mission, values, and commitment to trustworthy Nepal news and independent journalism.',
+      keywords: 'about Sidha Reporting, Nepal journalism, Nepal news media, independent news channel Nepal',
+      canonical: 'https://sidhareporting.com/about',
+    });
   }, []);
 
   const stats = content.stats || [];

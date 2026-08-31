@@ -1,35 +1,31 @@
 # Robots.txt for Sidha Reporting
-# Allow all crawlers to index the site
 User-agent: *
 Allow: /
-Allow: /articles
+Allow: /articles/
 Allow: /payment
+Allow: /about
+Allow: /careers
+Allow: /notices
 
-# Disallow admin routes
-Disallow: /admin
-Disallow: /auth
-Disallow: /api
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /api/
+Disallow: /private/
 
-# Specify sitemap location
+Host: https://sidhareporting.com
 Sitemap: https://sidhareporting.com/sitemap.xml
 
-# Crawl delay to reduce server load (in seconds)
-Crawl-delay: 1
-
-# For Googlebot - allow faster crawling
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 0
 
-# For Bingbot
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 1
 
-# Disallow bad bots
 User-agent: MJ12bot
 Disallow: /
 
 User-agent: AhrefsBot
+Disallow: /
+
 User-agent: SemrushBot
 Disallow: /

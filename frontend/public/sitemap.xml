@@ -1,62 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  
-  <!-- Homepage -->
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0">
   <url>
     <loc>https://sidhareporting.com/</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>hourly</changefreq>
     <priority>1.0</priority>
     <mobile:mobile/>
   </url>
 
-  <!-- Articles Page -->
   <url>
     <loc>https://sidhareporting.com/articles</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
     <mobile:mobile/>
   </url>
 
-  <!-- Category Pages -->
   <url>
     <loc>https://sidhareporting.com/articles?category=breaking</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>hourly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
     <mobile:mobile/>
   </url>
 
   <url>
     <loc>https://sidhareporting.com/articles?category=politics</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
     <mobile:mobile/>
   </url>
 
   <url>
     <loc>https://sidhareporting.com/articles?category=business</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>hourly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
 
   <url>
     <loc>https://sidhareporting.com/articles?category=sports</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>hourly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
 
   <url>
     <loc>https://sidhareporting.com/articles?category=technology</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
@@ -64,7 +59,7 @@
 
   <url>
     <loc>https://sidhareporting.com/articles?category=entertainment</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
@@ -72,27 +67,41 @@
 
   <url>
     <loc>https://sidhareporting.com/articles?category=health</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <mobile:mobile/>
-  </url>
-
-  <url>
-    <loc>https://sidhareporting.com/articles?category=world</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <mobile:mobile/>
-  </url>
-
-  <!-- Premium/Payment Page -->
-  <url>
-    <loc>https://sidhareporting.com/payment</loc>
-    <lastmod>2024-01-01T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
 
+  <url>
+    <loc>https://sidhareporting.com/about</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://sidhareporting.com/careers</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://sidhareporting.com/notices</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://sidhareporting.com/payment</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
 </urlset>

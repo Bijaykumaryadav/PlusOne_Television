@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase, MapPin, Clock, ChevronRight, Users, Target, Heart } from 'lucide-react';
 import { getCareerContent } from '@/lib/siteContent';
+import { setPageSEO } from '@/utils/seoUtils';
 
 const VALUE_ICONS = {
   'Truth First': <Target className="w-6 h-6 text-red-600" />,
@@ -21,6 +22,12 @@ export default function CareerPage() {
 
   useEffect(() => {
     setContent(getCareerContent());
+    setPageSEO({
+      title: 'Careers at Sidha Reporting | Join Our News Team',
+      description: 'Explore career opportunities at Sidha Reporting and join a growing Nepal news team focused on credible journalism.',
+      keywords: 'careers Nepal news, journalism jobs Nepal, news team careers, Sidha Reporting jobs',
+      canonical: 'https://sidhareporting.com/careers',
+    });
   }, []);
 
   const jobs = content.jobs || [];
