@@ -57,6 +57,16 @@ const injectOGMeta = (article) => {
   canonical.setAttribute('href', url);
 };
 
+const getGuestId = () => {
+  const storageKey = 'sidhaGuestId';
+  let guestId = localStorage.getItem(storageKey);
+  if (!guestId) {
+    guestId = `guest-${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+    localStorage.setItem(storageKey, guestId);
+  }
+  return guestId;
+};
+
 const cleanupMeta = () => {
   ['og:title','og:description','og:image','og:image:width','og:image:height',
    'og:url','og:type','og:site_name'].forEach(p => {
@@ -106,6 +116,7 @@ const ArticleDetail = () => {
   const [likeCount,  setLikeCount]  = useState(0);
   const [shareCount, setShareCount] = useState(0);
   const [viewCount,  setViewCount]  = useState(0);
+  const [reactionPending, setReactionPending] = useState(false);
 
   // ── fetch article ──
   useEffect(() => {
@@ -122,7 +133,7 @@ const ArticleDetail = () => {
           setShareCount(a.shareCount || 0);
           setViewCount(a.views       || 0);
 
-          const liked = JSON.parse(localStorage.getItem('likedArticles') || '[]');
+          const liked = JSON.parse(localStorage.getItem(`likedArticles:${getGuestId()}`) || '[]');
           setLiked(liked.includes(a._id));
 
           // Inject route-specific SEO metadata and schema so article keywords rank in search and social previews
@@ -157,51 +168,59 @@ const ArticleDetail = () => {
 
   // ── like handler ──
   const handleLike = async () => {
+    if (!article || reactionPending) return;
+
     // Optimistic update
     const wasLiked = liked;
+    const guestId = getGuestId();
+    const storageKey = `likedArticles:${guestId}`;
     setLiked(!wasLiked);
     setLikeCount(prev => wasLiked ? Math.max(0, prev - 1) : prev + 1);
+    setReactionPending(true);
 
     try {
       if (wasLiked) {
-        await publicClient.delete(`/articles/${article._id}/like`, { data: { userId: 'guest-user' } });
-        const stored = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-        localStorage.setItem('likedArticles', JSON.stringify(stored.filter(aid => aid !== article._id)));
+        const { data } = await publicClient.delete(`/articles/${article._id}/like`, { data: { userId: guestId } });
+        setLikeCount(data?.data?.likeCount ?? 0);
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        localStorage.setItem(storageKey, JSON.stringify(stored.filter(aid => aid !== article._id)));
       } else {
-        await publicClient.post(`/articles/${article._id}/like`, { userId: 'guest-user' });
-        const stored = JSON.parse(localStorage.getItem('likedArticles') || '[]');
+        const { data } = await publicClient.post(`/articles/${article._id}/like`, { userId: guestId });
+        setLikeCount(data?.data?.likeCount ?? 0);
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
         if (!stored.includes(article._id)) {
           stored.push(article._id);
-          localStorage.setItem('likedArticles', JSON.stringify(stored));
+          localStorage.setItem(storageKey, JSON.stringify(stored));
         }
       }
-      // Sync real count from server
-      const { data } = await publicClient.get(`/articles/${slug}`);
-      if (data?.data) setLikeCount(data.data.likeCount || 0);
     } catch (err) {
       // Rollback on failure
       setLiked(wasLiked);
       setLikeCount(prev => wasLiked ? prev + 1 : Math.max(0, prev - 1));
       console.error('Error toggling like:', err);
+    } finally {
+      setReactionPending(false);
     }
   };
 
   // ── share handler ──
   const handleShare = async (platform) => {
-    if (!article) return;
+    if (!article || reactionPending) return;
     setShareOpen(false);
 
     // Optimistic count bump
     setShareCount(prev => prev + 1);
+    setReactionPending(true);
 
     // Track on backend
     try {
-      await publicClient.post(`/articles/${article._id}/share`);
-      // Sync real count
-      const { data } = await publicClient.get(`/articles/${slug}`);
-      if (data?.data) setShareCount(data.data.shareCount || 0);
+      const { data } = await publicClient.post(`/articles/${article._id}/share`);
+      setShareCount(data?.data?.shareCount ?? 0);
     } catch (err) {
+      setShareCount(prev => Math.max(0, prev - 1));
       console.error('Share tracking error:', err);
+    } finally {
+      setReactionPending(false);
     }
 
     // Open platform share window
@@ -213,16 +232,20 @@ const ArticleDetail = () => {
 
   // ── copy link ──
   const handleCopyLink = async () => {
+    if (!article || reactionPending) return;
     const url = `${window.location.origin}${buildArticleUrl(article)}`;
     copyToClipboard(url);
     setShareOpen(false);
     setShareCount(prev => prev + 1);
+    setReactionPending(true);
     try {
-      await publicClient.post(`/articles/${article._id}/share`);
-      const { data } = await publicClient.get(`/articles/${slug}`);
-      if (data?.data) setShareCount(data.data.shareCount || 0);
+      const { data } = await publicClient.post(`/articles/${article._id}/share`);
+      setShareCount(data?.data?.shareCount ?? 0);
     } catch (err) {
+      setShareCount(prev => Math.max(0, prev - 1));
       console.error('Copy share tracking error:', err);
+    } finally {
+      setReactionPending(false);
     }
     alert('Link copied to clipboard!');
   };
@@ -350,6 +373,7 @@ const ArticleDetail = () => {
                   {/* Like button */}
                   <button
                     onClick={handleLike}
+                    disabled={reactionPending}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200 ${
                       liked
                         ? 'bg-red-50 border-red-300 text-red-600 shadow-sm'
@@ -364,6 +388,7 @@ const ArticleDetail = () => {
                   <div className="relative" ref={shareRef}>
                     <button
                       onClick={() => setShareOpen(prev => !prev)}
+                      disabled={reactionPending}
                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200"
                     >
                       <Share2 className="w-4 h-4" />
