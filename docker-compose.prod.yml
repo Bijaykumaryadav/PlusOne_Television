@@ -1,19 +1,43 @@
 version: '3.8'
 
 services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: SidhaReporting
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - fullstack-network
+
   server:
     build: ./backend
     container_name: express-server
     ports:
       - "8000:8000"
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+      PORT: 8000
+      FRONTEND_URL: http://localhost:5173
+      MONGO_URL: mongodb://mongo:27017/SidhaReporting
     networks:
       - fullstack-network
+    depends_on:
+      mongo:
+        condition: service_healthy
     restart: unless-stopped
     env_file:
       - ./backend/.env
-    # Optional: Add volume for persistent logs
     volumes:
       - ./backend/logs:/usr/src/app/logs
 
@@ -30,7 +54,10 @@ services:
       - server
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+
+volumes:
+  mongo-data:
 
 networks:
   fullstack-network:
