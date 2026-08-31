@@ -34,7 +34,21 @@ const buildSocialMetaPage = (article) => {
   const image = article.image
     ? (/^https?:\/\//i.test(article.image) ? article.image : `https://sidhareporting.com${article.image.startsWith("/") ? article.image : `/${article.image}`}`)
     : "https://sidhareporting.com/logofinal.png";
-  const url = `https://sidhareporting.com/articles/${article.slug || article.slugEn || encodeURIComponent(title)}`;
+    const slug = article.slugEn || article.slug || encodeURIComponent(title);
+    const url = `https://sidhareporting.com/articles/${encodeURIComponent(slug)}`;
+    const publishedDate = article.publishedDate ? new Date(article.publishedDate).toISOString() : "";
+    const tags = Array.isArray(article.tags)
+      ? article.tags
+      : String(article.tags || "").split(",").map((tag) => tag.trim()).filter(Boolean);
+    const keywords = [...new Set([
+      title,
+      article.routeTitleEn,
+      article.routeTitleNe,
+      article.category,
+      ...tags,
+      "Nepal news",
+      "breaking news Nepal",
+    ].filter(Boolean))].join(", ");
 
   return `<!doctype html>
   <html lang="en">
@@ -43,6 +57,8 @@ const buildSocialMetaPage = (article) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>${escapeHtml(title)} | Sidha Reporting</title>
       <meta name="description" content="${escapeHtml(description)}" />
+        <meta name="keywords" content="${escapeHtml(keywords)}" />
+        <meta name="news_keywords" content="${escapeHtml(keywords)}" />
       <meta name="robots" content="index, follow" />
       <meta property="og:title" content="${escapeHtml(title)}" />
       <meta property="og:description" content="${escapeHtml(description)}" />
@@ -122,12 +138,33 @@ app.get("/articles/:slug", async (req, res) => {
     const slug = decodeURIComponent(req.params.slug || "");
     const article = await Article.findOne({
       $or: [
-        { slug: slug },
-        { slugEn: slug },
-        { title: slug },
+          { slug: slug },
+          { slugEn: slug },
+          { routeTitleNe: slug },
+          { routeTitleEn: slug },
+          { title: slug },
       ],
       status: "published",
     }).lean();
+
+      if (!article) {
+        const articles = await Article.find({ status: "published" })
+          .select("_id title routeTitleNe routeTitleEn slug slugEn")
+          .lean();
+        const normalizedSlug = slug.toLowerCase();
+        const matched = articles.find((candidate) => [
+          candidate.slug,
+          candidate.slugEn,
+          candidate.routeTitleNe,
+          candidate.routeTitleEn,
+          candidate.title,
+        ].some((value) => String(value || "").trim().toLowerCase() === normalizedSlug));
+
+        if (matched) {
+          const fullArticle = await Article.findById(matched._id).lean();
+          return res.type("html").send(buildSocialMetaPage(fullArticle));
+        }
+      }
 
     if (!article) {
       return res.status(404).send("Article not found");
