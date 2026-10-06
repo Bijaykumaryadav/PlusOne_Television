@@ -7,6 +7,7 @@ import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, ChevronLeft, Lin
 import { copyToClipboard, setArticleMetaTags } from '@/utils/shareUtils';
 import { buildArticleUrl, setupArticleSEO } from '@/utils/seoUtils';
 import { Button } from '@/components/ui/button';
+import AdSlot from '@/components/users-view/ad-slot';
 
 // ─── inject / update <meta> tags dynamically ───────────────────────────────
 const setMetaTag = (property, content, isName = false) => {
@@ -505,6 +506,7 @@ const ArticleDetail = () => {
 
             </div>
           </article>
+          <AdSlot position="article" className="mt-6" />
         </div>
       </main>
 

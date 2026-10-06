@@ -4,7 +4,7 @@ import UsersFooter from '../../components/users-view/users-footer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import { getAboutContent } from '@/lib/siteContent';
+import { getAboutContent, getDefaultAboutContent } from '@/lib/siteContent';
 import { setPageSEO } from '@/utils/seoUtils';
 
 const ICONS = {
@@ -23,10 +23,12 @@ function getInitials(name = '') {
 }
 
 export default function AboutPage() {
-  const [content, setContent] = useState(getAboutContent());
+  const [content, setContent] = useState(getDefaultAboutContent());
 
   useEffect(() => {
-    setContent(getAboutContent());
+    getAboutContent().then(setContent).catch((error) => {
+      console.error('Failed to load About page content', error);
+    });
     setPageSEO({
       title: 'About Sidha Reporting | Nepal News and Journalism',
       description: 'Learn about Sidha Reporting, our mission, values, and commitment to trustworthy Nepal news and independent journalism.',

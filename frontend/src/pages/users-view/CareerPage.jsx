@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase, MapPin, Clock, ChevronRight, Users, Target, Heart } from 'lucide-react';
-import { getCareerContent } from '@/lib/siteContent';
+import { getCareerContent, getDefaultCareerContent } from '@/lib/siteContent';
 import { setPageSEO } from '@/utils/seoUtils';
 
 const VALUE_ICONS = {
@@ -15,13 +15,15 @@ const VALUE_ICONS = {
 };
 
 export default function CareerPage() {
-  const [content, setContent] = useState(getCareerContent());
+  const [content, setContent] = useState(getDefaultCareerContent());
   const [selectedJob, setSelectedJob] = useState(null);
   const [applied, setApplied] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
 
   useEffect(() => {
-    setContent(getCareerContent());
+    getCareerContent().then(setContent).catch((error) => {
+      console.error('Failed to load Careers page content', error);
+    });
     setPageSEO({
       title: 'Careers at Sidha Reporting | Join Our News Team',
       description: 'Explore career opportunities at Sidha Reporting and join a growing Nepal news team focused on credible journalism.',

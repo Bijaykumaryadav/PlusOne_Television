@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { shareOnSocialMedia, copyToClipboard } from '@/utils/shareUtils';
 import { buildArticleUrl } from '@/utils/seoUtils';
 import { fetchAllArticles } from '@/features/articles/articlesSlice';
+import AdSlot from '@/components/users-view/ad-slot';
 
 const ArticlesList = () => {
   const dispatch = useDispatch();
@@ -120,6 +121,7 @@ const ArticlesList = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <UsersHeader />
       <main className="flex-1">
+        <AdSlot position="article" className="mx-auto max-w-7xl px-4 pt-5 md:px-6" />
         <div className="max-w-7xl mx-auto p-4 md:p-6">
           {/* Page Header */}
           <div className="mb-8">

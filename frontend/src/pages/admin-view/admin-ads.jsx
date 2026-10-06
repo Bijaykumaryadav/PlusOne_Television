@@ -59,7 +59,7 @@ function AdminAdTile({ ad, setFormData, setOpenCreateAdDialog, setCurrentEditedI
               linkUrl: ad.linkUrl || "",
               bannerText: ad.bannerText || "",
               position: ad.position || "sidebar",
-              isActive: ad.isActive || true,
+              isActive: ad.isActive ?? true,
               endDate: ad.endDate ? new Date(ad.endDate).toISOString().split('T')[0] : "",
               priority: ad.priority || 1,
             });
@@ -103,7 +103,7 @@ const adFormElements = [
     placeholder: "Text to display on banner",
   },
   {
-    label: "Link URL",
+    label: "Link URL (Optional)",
     name: "linkUrl",
     componentType: "input",
     type: "url",
@@ -114,10 +114,16 @@ const adFormElements = [
     name: "position",
     componentType: "select",
     options: [
-      { id: "top", label: "Header Carousel / Top" },
+      { id: "top", label: "Header Banner (Laptop)" },
+      { id: "header-mobile", label: "Header Banner (Mobile)" },
+      { id: "home", label: "Home Landing Banner" },
+      { id: "flash", label: "First-Visit Flash Ad" },
+      { id: "article", label: "Every Article Detail Page" },
       { id: "text", label: "Text Ticker / Breaking Ad" },
-      { id: "sidebar", label: "Sidebar" },
-      { id: "bottom", label: "Bottom" },
+      { id: "sidebar-laptop", label: "Sidebar (Laptop)" },
+      { id: "sidebar-mobile", label: "Sidebar (Mobile)" },
+      { id: "sidebar", label: "Sidebar (All Devices)" },
+      { id: "bottom", label: "Bottom of Pages" },
     ],
   },
   {

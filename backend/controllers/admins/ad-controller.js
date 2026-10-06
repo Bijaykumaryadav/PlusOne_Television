@@ -8,9 +8,27 @@ const normalizeAdPosition = (position) => {
   if (!value) return 'sidebar';
   if (['header', 'top'].includes(value)) return 'top';
   if (['text', 'ticker', 'marquee', 'breaking'].includes(value)) return 'text';
-  if (['sidebar', 'bottom'].includes(value)) return value;
+  if (['landing', 'home'].includes(value)) return 'home';
+  if (['interstitial', 'flash'].includes(value)) return 'flash';
+  if (['desktop-header', 'laptop-header', 'header-laptop'].includes(value)) return 'header-laptop';
+  if (['mobile-header', 'header-mobile'].includes(value)) return 'header-mobile';
+  if (['desktop-sidebar', 'laptop-sidebar', 'sidebar-laptop'].includes(value)) return 'sidebar-laptop';
+  if (['mobile-sidebar', 'sidebar-mobile'].includes(value)) return 'sidebar-mobile';
+  if (['sidebar', 'bottom', 'article'].includes(value)) return value;
 
   return value;
+};
+
+const activeEndDateFilter = () => {
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  return {
+    $or: [
+      { endDate: { $exists: false } },
+      { endDate: null },
+      { endDate: { $gte: startOfToday } },
+    ],
+  };
 };
 
 // @desc    Get all active ads
@@ -20,7 +38,7 @@ const getAllAds = async (req, res) => {
   try {
     const ads = await Ad.find({
       isActive: true,
-      endDate: { $gte: new Date() }
+      ...activeEndDateFilter(),
     }).sort({ priority: 1, createdAt: -1 });
 
     res.status(200).json({
@@ -48,7 +66,7 @@ const getAdsByPosition = async (req, res) => {
     const ads = await Ad.find({
       isActive: true,
       position: queryPosition,
-      endDate: { $gte: new Date() }
+      ...activeEndDateFilter(),
     }).sort({ priority: 1, createdAt: -1 });
 
     res.status(200).json({
@@ -100,7 +118,7 @@ const createAd = async (req, res) => {
       bannerText,
       position: normalizedPosition,
       isActive: isActive !== false,
-      endDate,
+      endDate: endDate || undefined,
       priority: priority || 1,
     });
 
@@ -146,11 +164,11 @@ const updateAd = async (req, res) => {
     ad.title = req.body.title || ad.title;
     ad.description = req.body.description || ad.description;
     ad.imageUrl = req.body.imageUrl !== undefined ? req.body.imageUrl : ad.imageUrl;
-    ad.linkUrl = req.body.linkUrl || ad.linkUrl;
+    if (req.body.linkUrl !== undefined) ad.linkUrl = req.body.linkUrl || '';
     ad.bannerText = req.body.bannerText || ad.bannerText;
     ad.position = nextPosition;
     ad.isActive = req.body.isActive !== undefined ? req.body.isActive : ad.isActive;
-    ad.endDate = req.body.endDate || ad.endDate;
+    ad.endDate = req.body.endDate || undefined;
     ad.priority = req.body.priority !== undefined ? req.body.priority : ad.priority;
 
     await ad.save();
@@ -207,7 +225,7 @@ const recordAdClick = async (req, res) => {
   try {
     const ad = await Ad.findByIdAndUpdate(
       req.params.id,
-      { $inc: { clicks: 1, views: 1 } },
+      { $inc: { clicks: 1 } },
       { new: true }
     );
 

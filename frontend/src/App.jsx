@@ -22,6 +22,7 @@ import PaymentVerifyPage from "./pages/users-view/PaymentVerifyPage";
 import CareerPage from "./pages/users-view/CareerPage";        // ← new
 import AboutPage from "./pages/users-view/AboutPage";          // ← new
 import NoticePage from "./pages/users-view/NoticePage";        // ← new
+import FlashAd from "@/components/users-view/flash-ad";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      <FlashAd />
       <Routes>
         {/* User Routes */}
         <Route path="/" element={<UsersDashboard />} />

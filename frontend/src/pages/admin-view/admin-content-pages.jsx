@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, FileText, Plus, Save, Trash2, UserRound, Image as ImageIcon } from "lucide-react";
-import { getAboutContent, getCareerContent, saveAboutContent, saveCareerContent, getDefaultAboutContent, getDefaultCareerContent } from "@/lib/siteContent";
+import { getAboutContentForAdmin, getCareerContentForAdmin, saveAboutContent, saveCareerContent, getDefaultAboutContent, getDefaultCareerContent } from "@/lib/siteContent";
 
 const panelStyle = "rounded-xl border border-slate-200 bg-white shadow-sm";
 
@@ -22,20 +22,30 @@ function AdminContentPages() {
   const [careerContent, setCareerContent] = useState(getDefaultCareerContent());
 
   useEffect(() => {
-    setAboutContent(getAboutContent());
-    setCareerContent(getCareerContent());
+    Promise.all([getAboutContentForAdmin(), getCareerContentForAdmin()])
+      .then(([about, career]) => {
+        setAboutContent(about);
+        setCareerContent(career);
+      })
+      .catch(() => toast.error("Could not load page content from the server"));
   }, []);
 
   const saveAbout = async () => {
-    saveAboutContent(aboutContent);
-    setAboutContent(getAboutContent());
-    toast.success("About page saved successfully");
+    try {
+      setAboutContent(await saveAboutContent(aboutContent));
+      toast.success("About page saved successfully");
+    } catch {
+      toast.error("Could not save the About page");
+    }
   };
 
   const saveCareer = async () => {
-    saveCareerContent(careerContent);
-    setCareerContent(getCareerContent());
-    toast.success("Career page saved successfully");
+    try {
+      setCareerContent(await saveCareerContent(careerContent));
+      toast.success("Career page saved successfully");
+    } catch {
+      toast.error("Could not save the Careers page");
+    }
   };
 
   const updateAboutArray = (key, index, field, value) => {

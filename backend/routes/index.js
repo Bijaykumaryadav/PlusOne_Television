@@ -6,6 +6,7 @@ const paymentsRoute = require("./payments");
 const adsRoute = require("./ads");
 const seoRoute = require("./seo");
 const contactsRoute = require("./contacts");
+const siteContentRoute = require("./site-content");
 const router = express.Router();
 
 router.use("/users",userRoute);
@@ -15,5 +16,6 @@ router.use("/payment", paymentsRoute);
 router.use("/ads", adsRoute);
 router.use("/seo", seoRoute);
 router.use("/contacts", contactsRoute);
+router.use("/site-content", siteContentRoute);
 
 module.exports = router; 

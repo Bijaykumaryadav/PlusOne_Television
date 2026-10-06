@@ -5,6 +5,7 @@ import { buildArticleUrl } from '@/utils/seoUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import logo from '@/assets/logofinal.png';
 import { publicClient } from '@/services/axiosInstance';
+import AdSlot from '@/components/users-view/ad-slot';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,8 +47,6 @@ export default function UsersHeader() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [previewArticle, setPreviewArticle] = useState(null);
   const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
-  const [currentTopAdIndex, setCurrentTopAdIndex] = useState(0);
-  const [headerAds, setHeaderAds] = useState([]);
   const [textAds, setTextAds] = useState([]);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
@@ -72,12 +71,7 @@ export default function UsersHeader() {
   useEffect(() => {
     const fetchHeaderAds = async () => {
       try {
-        const [topResponse, textResponse] = await Promise.all([
-          publicClient.get('/ads/position/top'),
-          publicClient.get('/ads/position/text'),
-        ]);
-
-        setHeaderAds((topResponse?.data?.data || []).filter(ad => ad?.isActive));
+        const textResponse = await publicClient.get('/ads/position/text');
         setTextAds((textResponse?.data?.data || []).filter(ad => ad?.isActive));
       } catch (error) {
         console.error('Error fetching ads:', error);
@@ -86,14 +80,6 @@ export default function UsersHeader() {
 
     fetchHeaderAds();
   }, []);
-
-  useEffect(() => {
-    if (!headerAds.length) return;
-    const interval = setInterval(() => {
-      setCurrentTopAdIndex(prev => (prev + 1) % headerAds.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [headerAds.length]);
 
   // Close "More" dropdown on outside click
   useEffect(() => {
@@ -131,8 +117,6 @@ export default function UsersHeader() {
   };
 
   const isMoreActive = MORE_NAV.some(item => getIsActive(item.path));
-  const currentTopAd = headerAds[currentTopAdIndex] || null;
-
   return (
     <>
       <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -157,30 +141,10 @@ export default function UsersHeader() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="hidden lg:block max-w-[260px] min-w-[220px] rounded-md bg-white/10 border border-white/20 px-2 py-1 text-left overflow-hidden">
-              {currentTopAd ? (
-                <button
-                  type="button"
-                  onClick={() => window.open(currentTopAd.linkUrl, '_blank', 'noopener,noreferrer')}
-                  className="flex items-center gap-2 w-full text-left hover:text-yellow-200 transition-colors"
-                >
-                  {currentTopAd.imageUrl ? (
-                    <img src={currentTopAd.imageUrl} alt={currentTopAd.title} className="w-8 h-8 rounded object-cover" />
-                  ) : (
-                    <div className="w-8 h-8 rounded bg-yellow-300/30 flex items-center justify-center text-[10px] text-white font-bold">Ad</div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[10px] uppercase tracking-wide text-white/70">Sponsored</div>
-                    <div className="text-xs font-semibold truncate">{currentTopAd.title}</div>
-                  </div>
-                </button>
-              ) : (
-                <div className="text-[10px] uppercase tracking-wide text-white/70">Top Ad</div>
-              )}
-            </div>
-          </div>
         </div>
+
+        <AdSlot position="header-laptop" fallbackPosition="top" variant="header" className="hidden border-b border-slate-200 bg-slate-50 lg:block" />
+        <AdSlot position="header-mobile" fallbackPosition="top" variant="header" className="border-b border-slate-200 bg-slate-50 lg:hidden" />
 
         {textAds.length > 0 && (
           <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-100 border-b border-yellow-200 px-4 py-2">
@@ -195,8 +159,11 @@ export default function UsersHeader() {
                       <button
                         key={`${ad._id || ad.title}-${index}`}
                         type="button"
-                        onClick={() => window.open(ad.linkUrl, '_blank', 'noopener,noreferrer')}
-                        className="whitespace-nowrap rounded-full border border-yellow-300 bg-white/80 px-3 py-1 shadow-sm hover:bg-yellow-100 transition-colors"
+                        onClick={() => {
+                          if (ad.linkUrl) window.open(ad.linkUrl, '_blank', 'noopener,noreferrer');
+                        }}
+                        disabled={!ad.linkUrl}
+                        className="whitespace-nowrap rounded-full border border-yellow-300 bg-white/80 px-3 py-1 shadow-sm transition-colors enabled:hover:bg-yellow-100 disabled:cursor-default"
                       >
                         <span className="font-black text-red-600">{ad.title}</span>
                         {ad.description ? <span className="mx-2 text-slate-500">•</span> : null}

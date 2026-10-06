@@ -14,6 +14,7 @@ import { Heart, Share2, Facebook, Twitter, MessageCircle, Copy, Eye, Linkedin } 
 import { shareOnSocialMedia, copyToClipboard } from '@/utils/shareUtils';
 import { setupHomepageSEO, buildArticleUrl } from '@/utils/seoUtils';
 import { fetchAllArticles, fetchFeaturedArticles, fetchCategoizedArticles, setCurrentCategory } from '@/features/articles/articlesSlice';
+import AdSlot from '@/components/users-view/ad-slot';
 
 const CATEGORIES = [
   { id: 'breaking', label: 'Breaking' },
@@ -45,7 +46,6 @@ export default function UsersDashboard() {
   const [likedArticles, setLikedArticles] = useState(new Set());
   const [shareOpen, setShareOpen] = useState(null);
   const [articleStats, setArticleStats] = useState({});
-  const [ads, setAds] = useState([]);
   const [activeTab, setActiveTab] = useState('featured');
 
   // Sync activeTab with URL query params
@@ -80,27 +80,7 @@ export default function UsersDashboard() {
     }
     const likedSet = new Set(JSON.parse(localStorage.getItem('likedArticles') || '[]'));
     setLikedArticles(likedSet);
-    fetchAds();
   }, [dispatch]);
-
-  const fetchAds = async () => {
-    try {
-      const [sidebarResponse, topResponse] = await Promise.all([
-        publicClient.get('/ads/position/sidebar'),
-        publicClient.get('/ads/position/top'),
-      ]);
-
-      const sidebarAds = sidebarResponse?.data?.data || [];
-      const topAds = topResponse?.data?.data || [];
-
-      setAds(sidebarAds.length ? sidebarAds : []);
-      if (sidebarAds.length === 0 && topAds.length > 0) {
-        setAds(topAds);
-      }
-    } catch (error) {
-      console.error('Error fetching ads:', error);
-    }
-  };
 
   const handleCategoryFilter = (categoryId) => {
     if (categoryId) {
@@ -387,43 +367,8 @@ export default function UsersDashboard() {
         </Card>
       )}
 
-      {ads.length > 0 ? (
-        <div className="space-y-4">
-          {ads.map((ad, index) => (
-            <Card
-              key={ad._id || `${ad.title}-${index}`}
-              className="overflow-hidden border-0 cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={async () => {
-                try {
-                  await publicClient.put(`/ads/${ad._id}/click`);
-                  window.open(ad.linkUrl, '_blank', 'noopener,noreferrer');
-                } catch (error) {
-                  console.error('Error tracking ad click:', error);
-                }
-              }}
-            >
-              <div className="relative overflow-hidden bg-gray-200">
-                {ad.imageUrl && (
-                  <img src={ad.imageUrl} alt={ad.title} className="w-full h-52 object-cover hover:scale-105 transition-transform duration-300" />
-                )}
-                <div className="bg-white p-4">
-                  <div className="text-[10px] uppercase tracking-wide text-red-600 font-bold mb-1">Sponsored</div>
-                  <h4 className="font-bold text-gray-900 text-sm mb-1">{ad.title}</h4>
-                  {ad.description && <p className="text-xs text-gray-600 line-clamp-3">{ad.description}</p>}
-                  {ad.bannerText && <p className="mt-2 text-xs font-medium text-red-600">{ad.bannerText}</p>}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card className="bg-gradient-to-br from-gray-200 to-gray-300 border-0 min-h-80 flex items-center justify-center">
-          <CardContent className="text-center">
-            <p className="text-gray-600 font-semibold">Advertisement</p>
-            <p className="text-sm text-gray-500 mt-2">Your ad here</p>
-          </CardContent>
-        </Card>
-      )}
+      <AdSlot position="sidebar-mobile" fallbackPosition="sidebar" className="lg:hidden" />
+      <AdSlot position="sidebar-laptop" fallbackPosition="sidebar" className="hidden lg:block" />
 
       <Card>
         <CardContent className="p-6">
@@ -443,6 +388,8 @@ export default function UsersDashboard() {
       <UsersHeader />
 
       <main className="flex-1">
+
+        {location.pathname === '/' && !location.search && <AdSlot position="home" className="mx-auto max-w-7xl px-6 pt-5" />}
 
         {/* Featured strip ABOVE on Home/All tabs only */}
         {showFeaturedStrip && <FeaturedStrip />}

@@ -1,5 +1,7 @@
-const ABOUT_KEY = "plusone_about_content";
-const CAREER_KEY = "plusone_career_content";
+import privateClient, { publicClient } from "@/services/axiosInstance";
+
+const LEGACY_ABOUT_KEY = "plusone_about_content";
+const LEGACY_CAREER_KEY = "plusone_career_content";
 
 const defaultAboutContent = {
   heroTitle: "About Sidha Reporting",
@@ -79,39 +81,65 @@ const defaultCareerContent = {
   ],
 };
 
-function readContent(storageKey, fallback) {
-  if (typeof window === "undefined") return fallback;
-
+function readLegacyContent(storageKey) {
+  if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return fallback;
-    return { ...fallback, ...JSON.parse(raw) };
+    return raw ? JSON.parse(raw) : null;
   } catch (error) {
-    console.error("Failed to read content from localStorage", error);
-    return fallback;
+    console.error("Failed to read legacy site content", error);
+    return null;
   }
 }
 
-function writeContent(storageKey, value) {
-  if (typeof window === "undefined") return value;
-  window.localStorage.setItem(storageKey, JSON.stringify(value));
-  return value;
+async function fetchContent(key, fallback) {
+  const { data } = await publicClient.get(`/site-content/${key}`);
+  return {
+    exists: data.exists,
+    content: { ...fallback, ...(data.data || {}) },
+  };
 }
 
-export function getAboutContent() {
-  return readContent(ABOUT_KEY, defaultAboutContent);
+export async function getAboutContent() {
+  const result = await fetchContent("about", defaultAboutContent);
+  return result.content;
 }
 
-export function saveAboutContent(content) {
-  return writeContent(ABOUT_KEY, { ...defaultAboutContent, ...content });
+export async function getAboutContentForAdmin() {
+  const result = await fetchContent("about", defaultAboutContent);
+  const legacyContent = readLegacyContent(LEGACY_ABOUT_KEY);
+  if (!result.exists && legacyContent) {
+    return saveAboutContent({ ...defaultAboutContent, ...legacyContent });
+  }
+  return result.content;
 }
 
-export function getCareerContent() {
-  return readContent(CAREER_KEY, defaultCareerContent);
+export async function saveAboutContent(content) {
+  const value = { ...defaultAboutContent, ...content };
+  const { data } = await privateClient.put("/site-content/about", value);
+  if (typeof window !== "undefined") window.localStorage.removeItem(LEGACY_ABOUT_KEY);
+  return { ...defaultAboutContent, ...data.data };
 }
 
-export function saveCareerContent(content) {
-  return writeContent(CAREER_KEY, { ...defaultCareerContent, ...content });
+export async function getCareerContent() {
+  const result = await fetchContent("career", defaultCareerContent);
+  return result.content;
+}
+
+export async function getCareerContentForAdmin() {
+  const result = await fetchContent("career", defaultCareerContent);
+  const legacyContent = readLegacyContent(LEGACY_CAREER_KEY);
+  if (!result.exists && legacyContent) {
+    return saveCareerContent({ ...defaultCareerContent, ...legacyContent });
+  }
+  return result.content;
+}
+
+export async function saveCareerContent(content) {
+  const value = { ...defaultCareerContent, ...content };
+  const { data } = await privateClient.put("/site-content/career", value);
+  if (typeof window !== "undefined") window.localStorage.removeItem(LEGACY_CAREER_KEY);
+  return { ...defaultCareerContent, ...data.data };
 }
 
 export function getDefaultAboutContent() {

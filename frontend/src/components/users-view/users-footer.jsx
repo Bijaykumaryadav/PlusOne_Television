@@ -3,12 +3,15 @@ import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'luc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import AdSlot from '@/components/users-view/ad-slot';
 
 export default function UsersFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-gray-900 text-gray-300 mt-16">
+      <AdSlot position="bottom" className="bg-white px-6 py-5" />
+
       {/* Newsletter Section */}
       <div className="bg-gradient-to-r from-red-600 to-red-800 text-white px-6 py-12">
         <div className="max-w-2xl mx-auto text-center">
