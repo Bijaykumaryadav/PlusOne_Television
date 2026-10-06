@@ -5,8 +5,6 @@ services:
     image: mongo:7
     container_name: mongo-db
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: SidhaReporting
     healthcheck:
@@ -24,11 +22,11 @@ services:
     build: ./backend
     container_name: express-server
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       NODE_ENV: production
       PORT: 8000
-      FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: https://sidhareporting.com
     networks:
       - fullstack-network
     restart: unless-stopped
@@ -45,7 +43,7 @@ services:
         VITE_API_URL: https://sidhareporting.com/apis/v1/
     container_name: react-client
     ports:
-      - "5173:3000"
+      - "127.0.0.1:5173:3000"
     networks:
       - fullstack-network
     depends_on:

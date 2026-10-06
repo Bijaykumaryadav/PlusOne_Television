@@ -20,6 +20,7 @@ NC='\033[0m' # No Color
 DOMAIN="sidhareporting.com"
 APP_DIR="/home/$(whoami)/plusone-television"
 REPO_URL="https://github.com/yourusername/plusone-television.git"
+COMPOSE_FILE="docker-compose.prod.yml"
 
 echo -e "${BLUE}📋 Deployment Checklist:${NC}"
 echo "1. Code pulled from GitHub"
@@ -48,19 +49,19 @@ echo ""
 
 # Step 3: Stop running containers
 echo -e "${YELLOW}Step 3: Stopping existing containers...${NC}"
-docker-compose down
+docker compose -f "$COMPOSE_FILE" down
 echo -e "${GREEN}✓ Containers stopped${NC}"
 echo ""
 
 # Step 4: Build Docker images
 echo -e "${YELLOW}Step 4: Building Docker images...${NC}"
-docker-compose build
+docker compose -f "$COMPOSE_FILE" build --no-cache client server
 echo -e "${GREEN}✓ Docker images built${NC}"
 echo ""
 
 # Step 5: Start containers
 echo -e "${YELLOW}Step 5: Starting containers...${NC}"
-docker-compose up -d
+docker compose -f "$COMPOSE_FILE" up -d
 echo -e "${GREEN}✓ Containers started${NC}"
 echo ""
 
@@ -87,7 +88,7 @@ echo "   Frontend: https://$DOMAIN"
 echo "   API: https://$DOMAIN/apis/v1/"
 echo ""
 echo "📋 Useful commands:"
-echo "   View logs: docker-compose logs -f"
-echo "   Restart: docker-compose restart"
-echo "   Stop: docker-compose down"
-echo "   Pull updates: git pull origin main && docker-compose up -d --build"
+echo "   View logs: docker compose -f $COMPOSE_FILE logs -f"
+echo "   Restart: docker compose -f $COMPOSE_FILE restart"
+echo "   Stop: docker compose -f $COMPOSE_FILE down"
+echo "   Pull updates: git pull origin main && docker compose -f $COMPOSE_FILE up -d --build"
