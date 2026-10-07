@@ -21,7 +21,7 @@ export const fetchAllArticles = createAsyncThunk(
 
 export const fetchFeaturedArticles = createAsyncThunk(
   'articles/fetchFeatured',
-  async (limit = 3, { rejectWithValue }) => {
+  async (limit = 20, { rejectWithValue }) => {
     try {
       const response = await publicClient.get(`/articles/featured?limit=${limit}`);
       return response.data.data;

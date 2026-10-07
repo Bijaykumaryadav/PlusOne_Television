@@ -392,7 +392,7 @@ const searchArticles = async (req, res) => {
 // @access  Public
 const getFeaturedArticles = async (req, res) => {
   try {
-    const { limit = 5 } = req.query;
+    const { limit = 20 } = req.query;
     
     const articles = await Article.find({
       featured: "yes",

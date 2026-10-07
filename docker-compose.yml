@@ -24,13 +24,13 @@ services:
       - ./backend/.env
     environment:
       NODE_ENV: production
-      FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: https://sidhareporting.com
 
   client:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:8000/apis/v1/
+        VITE_API_URL: https://sidhareporting.com/apis/v1/
     container_name: react-client
     ports:
       - "5173:3000"

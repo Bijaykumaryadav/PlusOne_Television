@@ -170,7 +170,7 @@ export default function UsersDashboard() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Stories</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {loadingFeatured
-            ? [...Array(3)].map((_, i) => (
+            ? [...Array(20)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <Skeleton className="w-full h-40" />
                   <CardContent className="p-4">
@@ -180,7 +180,7 @@ export default function UsersDashboard() {
                   </CardContent>
                 </Card>
               ))
-            : (featuredArticles.length ? featuredArticles : allArticles.slice(0, 3)).slice(0, 3).map(article => (
+            : (featuredArticles.length ? featuredArticles : allArticles.slice(0, 20)).slice(0, 20).map(article => (
                 <div
                   key={article._id}
                   className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group rounded-lg border border-gray-200 bg-white"
